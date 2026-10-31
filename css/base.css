@@ -1,0 +1,501 @@
+/* ============================================================
+   base.css — tokens, reset, layout, controles, tipografía
+   ============================================================ */
+
+:root {
+  --bg: #fff;
+  --fg: #1a1a1a;
+  --card: #f0f0f0;
+  --l: #f0d9b5;
+  --d: #b58863;
+  --ac: #2e7d32;
+  --hl: #ffeb3b;
+  --ad: #2e7d3299;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161616;
+    --fg: #eee;
+    --card: #262626;
+    --l: #d4b896;
+    --d: #8b6d4a;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #161616;
+  --fg: #eee;
+  --card: #262626;
+  --l: #d4b896;
+  --d: #8b6d4a;
+}
+
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: var(--fz, 16px) system-ui, sans-serif;
+}
+
+/* ---------- Layout principal ---------- */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 12px;
+}
+
+/* Tab panel base */
+section[id^="t"] {
+  display: none;
+}
+
+section[id^="t"].active {
+  display: block;
+}
+
+/* ---------- TAB JUGAR: Layout responsive de dos columnas ---------- */
+#tJ {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Desktop: dos columnas lado a lado */
+@media (min-width: 720px) {
+  #tJ {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  /* Columna izquierda: tablero + capturas/reloj */
+  #tJ > #wrap,
+  #tJ > .cap:first-of-type,
+  #tJ > .cap:last-of-type {
+    flex: 0 0 520px;
+    max-width: 520px;
+  }
+
+  /* Columna derecha: controles + panel lateral */
+  #tJ > #controlsColumn,
+  #tJ > #sideColumn {
+    flex: 1 1 300px;
+    min-width: 280px;
+    max-width: 420px;
+  }
+
+  /* Orden visual: tablero | controles + lado */
+  #tJ > #wrap { order: 1; }
+  #tJ > .cap:first-of-type { order: 2; }
+  #tJ > .cap:last-of-type { order: 3; }
+  #tJ > #controlsColumn { order: 4; }
+  #tJ > #sideColumn { order: 5; }
+}
+
+/* Asegurar que wrap mantenga aspect-ratio */
+#wrap {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  grid-template-rows: auto 18px;
+  width: 100%;
+  aspect-ratio: 1;
+  max-width: 520px;
+}
+
+#rk {
+  display: grid;
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+}
+
+#fl {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+
+.co {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: .7;
+}
+
+/* ---------- Controles agrupados ---------- */
+.controls-column,
+.side-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#gameControls,
+#rE,
+#rT {
+  margin-bottom: 4px;
+}
+
+/* ---------- Row utility ---------- */
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+input[type=range] {
+  flex: 1;
+  min-width: 100px;
+}
+
+input[type=number] {
+  width: 52px;
+  font: inherit;
+  padding: 4px;
+}
+
+button,
+select {
+  font: inherit;
+  font-size: calc(1em * var(--bfs, 1));
+  font-weight: var(--bfw, 700);
+  padding: var(--bpy, 7px) var(--bpx, 12px);
+  background-color: var(--bbg, var(--card));
+  color: var(--bfg, var(--fg));
+  border: 1.5px solid var(--bbd, #8884);
+  border-radius: var(--br, 10px);
+  box-shadow: var(--bsh, none);
+  transition: transform .08s, filter .15s, box-shadow .15s;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+select {
+  padding-right: 28px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+button:active {
+  transform: translateY(1px) scale(.97);
+  filter: brightness(.9);
+}
+
+button:disabled {
+  opacity: .5;
+}
+
+html.bgl button,
+html.bgl select {
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+input {
+  accent-color: var(--ac, #2e7d32);
+}
+
+input[type=number],
+textarea {
+  border: 1.5px solid #8884;
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--fg);
+}
+
+/* ---------- capturas y reloj ---------- */
+.cap {
+  min-height: 2em;
+  font-size: 24px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4px 0;
+  padding: 2px 8px;
+  background: var(--card);
+  border-radius: 8px;
+}
+
+.cap small {
+  font-size: 14px;
+}
+
+.clk {
+  font: 600 20px ui-monospace, monospace;
+}
+
+.chip {
+  background: #9a9a9a;
+  border-radius: 6px;
+  padding: 0 4px;
+}
+
+/* ---------- barra de ventaja ---------- */
+#bar {
+  height: 8px;
+  background: #c62828;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 6px 0 2px;
+}
+
+#bar i {
+  display: block;
+  height: 100%;
+  background: #4caf50;
+  transition: width .3s;
+}
+
+/* ---------- tarjetas ---------- */
+.card {
+  background: var(--card);
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-top: 10px;
+  font-size: 14px;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  .card { border-color: rgba(255,255,255,0.05); }
+}
+
+:root[data-theme="dark"] .card { border-color: rgba(255,255,255,0.05); }
+
+#res {
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--card);
+  font-weight: 600;
+  min-height: 1.4em;
+}
+
+#lst {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+@media (min-width: 720px) {
+  #lst {
+    max-height: none;
+    flex: 1;
+    min-height: 200px;
+  }
+}
+
+/* ---------- tablas ---------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+td,
+th {
+  padding: 3px 6px;
+  text-align: center;
+}
+
+td:first-child {
+  text-align: left;
+}
+
+/* ---------- etiquetas de jugada ---------- */
+.tag {
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 13px;
+}
+
+.Genial { background: #1bada6; }
+.Excelente { background: #5c9a2e; }
+.Bueno { background: #7ba05b; }
+.Libro { background: #a88865; }
+.Inexactitud { background: #e0a100; }
+.Error { background: #e8710a; }
+.Fallo { background: #c62828; }
+
+/* ---------- pestañas ---------- */
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+  margin-right: 48px;
+}
+
+.tabs button {
+  flex: 1;
+}
+
+.tabs .on {
+  background: var(--ac, #2e7d32);
+  color: #fff;
+}
+
+/* ---------- barras de progreso ---------- */
+.pb {
+  height: 12px;
+  border-radius: 6px;
+  background: #8884;
+  overflow: hidden;
+  margin: 2px 0 8px;
+}
+
+.pb i {
+  display: block;
+  height: 100%;
+  background: #4caf50;
+}
+
+/* ---------- deltas ---------- */
+.dl {
+  font-size: 11px;
+  padding: 1px 6px
+  border-radius: 9px;
+  background: #c5e1a5;
+  color: #1b5e20;
+}
+
+.dl.n {
+  background: #ffcdd2;
+  color: #b71c1c;
+}
+
+/* ---------- barra W/D/L ---------- */
+.wdl {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+
+/* ---------- botones pequeños ---------- */
+.mini {
+  font-size: 12px;
+  padding: 2px 7px;
+  margin-left: 4px;
+}
+
+#nv button {
+  flex: 1;
+}
+
+#pl {
+  font-size: 14px;
+  min-width: 90px;
+  text-align: center;
+}
+
+/* ---------- pantalla fija / completa ---------- */
+#lk {
+  grid-column: 1;
+  grid-row: 2;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  font-size: 10px;
+  line-height: 1;
+  border: 0;
+  background: transparent;
+  opacity: .75;
+}
+
+#fs {
+  position: fixed;
+  right: 6px;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 6px);
+  z-index: 30;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 15px;
+  line-height: 1;
+  opacity: .4;
+}
+
+#fs:active { opacity: 1; }
+
+html.lk,
+html.lk body { overflow: hidden; overscroll-behavior: none; }
+
+html.fs .tabs,
+html.fs #rE,
+html.fs #rT,
+html.fs #lst,
+html.fs #ex { display: none !important; }
+
+/* ---------- preferencias de interfaz ---------- */
+html.nb #bar,
+html.nb #pts { display: none; }
+
+html.nc .cap { display: none; }
+
+html.nl #lst { display: none; }
+
+html.no #op { display: none !important; }
+
+html.nco #rk,
+html.nco #fl { visibility: hidden; }
+
+html.nm .sq.mv::after { display: none; }
+
+html.cp main { padding: 4px; }
+
+html.cp .card { padding: 3px 8px; margin-top: 5px; }
+
+/* ---------- engranaje ---------- */
+#gear {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  right: 10px;
+  z-index: 40;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  font-size: 18px;
+  line-height: 1;
+  border-radius: 50%;
+}
+
+/* ---------- Ajustes responsive para pestañas no-Jugar ---------- */
+@media (min-width: 720px) {
+  #tP, #tF, #tL {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  #tP .card,
+  #tF .card,
+  #tL .card {
+    margin-top: 0;
+  }
+
+  #tP #hd,
+  #tL .card:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Transiciones suaves */
+main, #wrap, .card, .cap, #bar {
+  transition: all 0.2s ease;
+}
