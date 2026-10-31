@@ -4,10 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Entrenador de ajedrez</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600;700&display=swap">
-<link rel="stylesheet" href="css/design-tokens.css">
+<link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/board.css">
 <link rel="stylesheet" href="css/postgame.css">
 <link rel="stylesheet" href="css/lord.css">
@@ -24,33 +21,35 @@
 
   <!-- ==================== TAB: JUGAR ==================== -->
   <section id="tJ">
-    <div class="row" id="gameControls">
-      <select id="mode">
-        <option value="p">Práctica</option>
-        <option value="t">Reloj vs motor</option>
-        <option value="2">2 jugadores</option>
-      </select>
-      <button id="nw">Nueva partida</button>
-      <button id="fp">Girar</button>
+    <!-- Columna de controles (derecha en desktop) -->
+    <div class="controls-column" id="controlsColumn">
+      <div class="row" id="gameControls">
+        <select id="mode">
+          <option value="p">Práctica</option>
+          <option value="t">Reloj vs motor</option>
+          <option value="2">2 jugadores</option>
+        </select>
+        <button id="nw">Nueva partida</button>
+        <button id="fp">Girar</button>
+      </div>
+
+      <div class="row" id="rE">
+        <label>ELO: <b id="ev">1200</b></label>
+        <input id="elo" type="range" min="200" max="3000" step="50" value="1200">
+        <select id="col">
+          <option value="w">Blancas</option>
+          <option value="b">Negras</option>
+        </select>
+      </div>
+
+      <div class="row" id="rT">
+        <label>Blancas <input id="tw" type="number" min="1" max="180" value="5"> min</label>
+        <label>Negras <input id="tb" type="number" min="1" max="180" value="5"> min</label>
+        <label>+<input id="inc" type="number" min="0" max="60" value="0">s</label>
+      </div>
     </div>
 
-    <div class="row" id="rE">
-      <label>ELO: <b id="ev">1200</b></label>
-      <input id="elo" type="range" min="200" max="3000" step="50" value="1200">
-      <select id="col">
-        <option value="w">Blancas</option>
-        <option value="b">Negras</option>
-      </select>
-    </div>
-
-    <div class="row" id="rT">
-      <label>Blancas <input id="tw" type="number" min="1" max="180" value="5"> min</label>
-      <label>Negras <input id="tb" type="number" min="1" max="180" value="5"> min</label>
-      <label>+<input id="inc" type="number" min="0" max="60" value="0">s</label>
-    </div>
-
-    <div class="cap"><span id="tc"></span><b id="tk" class="clk"></b></div>
-
+    <!-- Tablero (izquierda en desktop) -->
     <div id="wrap">
       <div id="rk"></div>
       <div id="bd"></div>
@@ -58,31 +57,37 @@
       <button id="lk" title="Fijar pantalla">🔓</button>
     </div>
 
+    <!-- Capturas y reloj -->
+    <div class="cap"><span id="tc"></span><b id="tk" class="clk"></b></div>
     <div class="cap"><span id="bc"></span><b id="bk" class="clk"></b></div>
-    <div id="bar"><i></i></div>
-    <div id="pts"></div>
-    <div class="card" id="op" style="display:none"></div>
 
-    <div class="row" id="nv">
-      <button data-n="s">⏮</button>
-      <button data-n="b">◀</button>
-      <button data-n="f">▶</button>
-      <button data-n="e">⏭</button>
-      <span id="pl"></span>
+    <!-- Columna lateral (derecha en desktop) -->
+    <div class="side-column" id="sideColumn">
+      <div id="bar"><i></i></div>
+      <div id="pts"></div>
+      <div class="card" id="op" style="display:none"></div>
+
+      <div class="row" id="nv">
+        <button data-n="s">⏮</button>
+        <button data-n="b">◀</button>
+        <button data-n="f">▶</button>
+        <button data-n="e">⏭</button>
+        <span id="pl"></span>
+      </div>
+
+      <div class="card" id="ex" style="display:none"></div>
+      <div id="res">Tu turno</div>
+
+      <div class="row" id="actions">
+        <button id="rb" style="display:none">Ver informe</button>
+        <button id="rs">Rendirse</button>
+        <button id="hi">Pista</button>
+        <button id="ud">Deshacer</button>
+        <button id="th">Amenazas</button>
+      </div>
+
+      <div class="card" id="lst"></div>
     </div>
-
-    <div class="card" id="ex" style="display:none"></div>
-    <div id="res">Tu turno</div>
-
-    <div class="row" id="actions">
-      <button id="rb" style="display:none">Ver informe</button>
-      <button id="rs">Rendirse</button>
-      <button id="hi">Pista</button>
-      <button id="ud">Deshacer</button>
-      <button id="th">Amenazas</button>
-    </div>
-
-    <div class="card" id="lst"></div>
   </section>
 
   <!-- ==================== TAB: POST-PARTIDA ==================== -->

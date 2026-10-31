@@ -155,11 +155,10 @@ export class SettingsView {
     }).join('');
 
     this.root.innerHTML =
-      '<div class="panel">' +
       '<div class="hd">' +
-      '<h2 style="margin:0;font-size:var(--fs-xl)">⚙ Ajustes</h2>' +
-      '<span id="sdi" style="font-size:var(--fs-xs);opacity:.8"></span>' +
-      '<button data-x="close" aria-label="Cerrar">✕</button>' +
+      '<b style="font-size:18px">⚙ Ajustes</b>' +
+      '<span id="sdi" style="font-size:12px;opacity:.8"></span>' +
+      '<span><button data-x="save">💾 Guardar</button> <button data-x="close">✕</button></span>' +
       '<div id="sbar" style="flex-basis:100%"></div>' +
       '</div>' +
       sections +
@@ -168,19 +167,18 @@ export class SettingsView {
       `<div id="spg">${this.spritesHtml()}</div></details>` +
       '<details><summary>Mis ajustes guardados</summary>' +
       '<small>Guarda varias configuraciones con nombre y cárgalas cuando quieras.</small>' +
-      '<div class="row" style="margin-top:var(--sp-2)">' +
-      '<input id="spn" placeholder="Nombre" style="flex:1;min-width:0;padding:var(--sp-1) var(--sp-2);font:inherit;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--paper-sunken);color:var(--ink)">' +
-      '<button data-x="pnew" class="mini">Guardar como…</button></div>' +
+      '<div class="row" style="margin-top:6px">' +
+      '<input id="spn" placeholder="Nombre" style="flex:1;min-width:0;padding:6px">' +
+      '<button data-x="pnew">Guardar como…</button></div>' +
       `<div id="spl">${this.presetsHtml()}</div></details>` +
       '<details><summary>Datos</summary>' +
-      '<div class="row"><button data-x="setdef" class="mini">Fijar como predeterminados</button></div>' +
-      '<div class="row"><button data-x="reset" class="mini">Restablecer a mis predeterminados</button>' +
-      '<button data-x="fact" class="mini">De fábrica</button></div>' +
-      '<div class="row"><button data-x="newg" class="mini">Aplicar valores iniciales y nueva partida</button></div>' +
-      '<div class="row"><button data-x="exp" class="mini">Exportar</button><button data-x="imp" class="mini">Importar</button></div>' +
-      '<textarea id="spj" rows="4" style="width:100%;font:inherit;padding:var(--sp-2);border:1px solid var(--line);border-radius:var(--r-sm);background:var(--paper-sunken);color:var(--ink)" placeholder="Aquí aparece el JSON; pega uno y pulsa Importar"></textarea>' +
-      '<small id="spm" style="display:block;margin-top:var(--sp-1);font-size:var(--fs-xs);color:var(--ink-muted)"></small></details>' +
-      '</div>';
+      '<div class="row"><button data-x="setdef">Fijar estos ajustes como predeterminados</button></div>' +
+      '<div class="row"><button data-x="reset">Restablecer a mis predeterminados</button>' +
+      '<button data-x="fact">De fábrica</button></div>' +
+      '<div class="row"><button data-x="newg">Aplicar valores iniciales y nueva partida</button></div>' +
+      '<div class="row"><button data-x="exp">Exportar</button><button data-x="imp">Importar</button></div>' +
+      '<textarea id="spj" rows="4" style="width:100%" placeholder="Aquí aparece el JSON; pega uno y pulsa Importar"></textarea>' +
+      '<small id="spm"></small></details>';
 
     this.root.style.display = 'block';
     this.setStatus(status);
@@ -188,11 +186,9 @@ export class SettingsView {
 
   open(config, presets, status) {
     this.render(config, presets, status);
-    this.root.classList.add('open');
   }
 
   close() {
-    this.root.classList.remove('open');
     this.root.style.display = 'none';
   }
 

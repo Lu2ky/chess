@@ -218,18 +218,18 @@ export class GameView {
     const element = this.elements.list;
 
     if (!moves.length) {
-      element.innerHTML = '<div class="empty-list">Aún no hay jugadas</div>';
+      element.innerHTML = 'Aún no hay jugadas';
       return;
     }
 
-    element.innerHTML = moves.map((move, i) => {
+    element.innerHTML = moves.map(move => {
       const tag = ` <span class="tag ${escape(move.label)}">${escape(move.label)}</span>`;
       const best = move.best
         ? ` <small>mejor: ${escape(move.best)}${move.cause ? ` · ${escape(move.cause)}` : ''}</small>`
         : '';
       const buttons = move.hasBest ? this.buttons(move.index, move.ghostVisible) : '';
 
-      return `<div class="move-entry" style="animation-delay: ${i * 30}ms">${escape(move.number)} ${escape(move.san)}${tag}${best}${buttons}</div>`;
+      return `<div>${escape(move.number)} ${escape(move.san)}${tag}${best}${buttons}</div>`;
     }).join('');
 
     element.scrollTop = 1e5;
