@@ -1,0 +1,23 @@
+%% Chess Trainer - C4 Container Diagram
+%% Internal Architecture
+
+C4Container
+    title Chess Trainer - Container Diagram
+
+    Container_Boundary(app, "Entrenador de Ajedrez") {
+        Container(ui, "UI Layer", "HTML + CSS Custom Properties", "Tablero, paneles, ajustes, chat")
+        Container(engine, "Motor de Ajedrez", "JS vanilla - Minimax + Alpha-Beta", "Evaluación, búsqueda, clasificación jugadas")
+        Container(state, "Estado del Juego", "JS Objects + chess.js instance", "Posición, historial, reloj, modo")
+        Container(persistence, "Persistencia", "localStorage API", "Perfil, ajustes, aperturas")
+        Container(ai, "Lord (IA)", "window.claude.sample()", "Chat análisis + hologramas futuros")
+    }
+    
+    Container_Ext(chessjs, "chess.js", "CDN", "Reglas, FEN, PGN, movimientos")
+    
+    Rel(ui, engine, "Solicita mejor jugada / evalúa")
+    Rel(ui, state, "Lee/escribe estado")
+    Rel(state, chessjs, "Delegar reglas")
+    Rel(engine, chessjs, "Genera movimientos legales")
+    Rel(ui, persistence, "Carga/guarda")
+    Rel(ui, ai, "Envía contexto + pregunta")
+    Rel(ai, chessjs, "Simula posiciones FEN")

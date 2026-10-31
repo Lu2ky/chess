@@ -1,0 +1,82 @@
+%% Chess Trainer - Mind Map
+%% Feature Map
+
+mindmap
+  root((Entrenador\nde Ajedrez))
+    Jugar
+      Modos
+        Práctica
+        Reloj vs Motor
+        2 Jugadores
+      Motor
+        Minimax Alpha-Beta
+        Profundidad Iterativa
+        Quiescencia
+        Historial Heurístico
+        Evaluación Posicional
+      Clasificación
+        Genial/Excelente/Bueno
+        Libro/Inexactitud
+        Error/Fallo
+        Detección Causa
+      UI Tablero
+        Coordenadas
+        Arrastre Touch/Mouse
+        Resaltado Legal/Última/Amenazas
+        Ghost Move / Holograma
+        Pista + Amenazas
+        Deshacer (Práctica)
+      Reloj
+        Fischer Increment
+        Tiempo Agotado
+        Pausa en análisis
+    Post-partida
+      Gráfica Evaluación
+        SVG Polyline + Dots
+        Hold 400ms + 4-tap goto
+      Estadísticas
+        Por fase Apertura/Medio/Final
+        Precisión + Rating estimado
+        Por etiqueta Genial..Fallo
+      Momentos Clave
+        Top 3 pérdidas >100cp
+      Rendimiento Pieza
+        Precisión por tipo pieza
+    Perfil
+      Radar Habilidades
+        Apertura/Táctica/Estrategia/Finales/Tiempo
+        EMA ponderada 0.7/0.3
+      Sparkline Rating
+      Aperturas Jugadas
+        Win/Draw/Loss + Precisión
+      Errores Comunes
+        Conteo por causa
+    Lord IA
+      Chat Contextual
+        Posición Antes/Después
+        PGN Completo
+        Etiquetas + Justificación
+      Futuros Holograma
+        4 Tipos: Peligro/Mejor/Alternativa/Oportunidad
+        Max 3 líneas x 6 semijugadas
+        Validación legalidad
+        Animación ⏵ + Navegación ◀▶⏮⏭
+      Preguntas Rápidas
+        Contexto: Jugada o Partida
+    Ajustes
+      5 Categorías + Presets
+      Sprites Piezas Custom
+      Presets Nombrados
+      Export/Import JSON
+      Defaults Usuario/Fábrica
+    Persistencia
+      localStorage
+      aj_perfil (partidas)
+      aj_cfg (config actual)
+      aj_def (defaults usuario)
+      aj_perf (presets nombrados)
+    Libro Aperturas
+      200+ Líneas ECO
+      Validación al cargar
+      Detección en tiempo real
+      Fuera de libro indicator

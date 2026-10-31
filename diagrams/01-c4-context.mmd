@@ -1,0 +1,20 @@
+%% Chess Trainer - C4 Context Diagram
+%% System Overview
+
+C4Context
+    title Chess Trainer - System Context
+
+    Person(user, "Usuario", "Juega, analiza, aprende")
+    
+    System_Boundary(app, "Entrenador de Ajedrez") {
+        System(chessApp, "App Principal", "HTML/JS vanilla - Single file")
+    }
+    
+    System_Ext(chessjs, "chess.js", "Librería reglas + FEN/PGN")
+    System_Ext(localStorage, "localStorage", "Persistencia perfil + ajustes")
+    System_Ext(claude, "Claude API (opcional)", "Análisis IA 'Lord' via window.claude")
+    
+    Rel(user, chessApp, "Interacciona")
+    Rel(chessApp, chessjs, "Usa para reglas/validación")
+    Rel(chessApp, localStorage, "Guarda/carga perfil y ajustes")
+    Rel(chessApp, claude, "Consulta análisis Lord")

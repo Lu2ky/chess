@@ -1,0 +1,56 @@
+%% Chess Trainer - Flowchart
+%% Engine Search (Minimax + Iterative Deepening)
+
+flowchart TD
+    subgraph EngineMove [engineMove]
+        A["scoreAll(depth)"] --> B["Iterative Deepening d=1..depth"]
+        B --> C["Para cada d: hist={} ms=movimientos legales ordenar por hist + capturas"]
+        C --> D["Para cada movimiento: qg=300 g.move(m) s=-nm(d-1,-inf,+inf) g.undo()"]
+        D --> E["Retornar array {m,s} ordenado por score"]
+    end
+    
+    subgraph Negamax [nm]
+        F{"d==0?"} -->|Si| G["qs(a,b,QD)"]
+        F -->|No| H["ms=movimientos ordenar por hist"]
+        H --> I["Para cada m: g.move(m) s=-nm(d-1,-b,-a) g.undo()"]
+        I --> J{"s>=b?"}
+        J -->|Si| K["hist[key]+=d*d return b"]
+        J -->|No| L{"s>a? a=s"}
+        L --> M["return a"]
+    end
+    
+    subgraph Quiescence [qs]
+        N{"c=in_check?"} -->|Si| O["ms=solo capturas/evasiones"]
+        N -->|No| P["s=ev() stand-pat if s>=b return b if s>a a=s"]
+        P --> O
+        O --> Q{"k<=0 or qg<=0?"}
+        Q -->|Si| R["return c?ev():a"]
+        Q -->|No| S["qg-- filtrar capturas/promos ordenar"]
+        S --> T["Para cada m: poda delta si !c g.move(m) v=-qs(-b,-a,k-1) g.undo()"]
+        T --> U{"v>=b? return b v>a? a=v"}
+        U --> V["return a"]
+    end
+    
+    subgraph Evaluation [ev]
+        W["Recorrer tablero 8x8"] --> X["Material base V[]"]
+        X --> Y["Bonus centralidad C=3.5-max(|r-3.5|,|c-3.5|)"]
+        Y --> Z["Bonus peones (p.color==w?6-r:r-1)*4"]
+        Z --> AA["Suma con signo w:+ b:-"]
+        AA --> AB["return turn==w?s:-s"]
+    end
+    
+    subgraph Classify [classify]
+        AC["best=max(all.s) loss=clamp(best-pm.s)"] --> AD{"loss<=15 && pieza mayor colgada?"}
+        AD -->|Si| AE["Genial"]
+        AD -->|No| AF{"En libro BK?"}
+        AF -->|Si| AG["Libro"]
+        AF -->|No| AH["Tabla umbrales: <=10 Excelente <=40 Bueno <=100 Inexactitud <=250 Error >250 Fallo"]
+        AH --> AI["cause() detecta: Mate, pieza colgada, captura perdida, tactica"]
+        AI --> AJ["Retornar {label,loss,m,best,bm,cs}"]
+    end
+    
+    style EngineMove fill:#e8f5e9
+    style Negamax fill:#fff3e0
+    style Quiescence fill:#e3f2fd
+    style Evaluation fill:#fce4ec
+    style Classify fill:#f3e5f5

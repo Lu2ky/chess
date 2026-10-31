@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Entrenador de ajedrez</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/board.css">
+<link rel="stylesheet" href="css/postgame.css">
+<link rel="stylesheet" href="css/lord.css">
+<link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+<main>
+  <div class="tabs" id="tabs">
+    <button data-t="J" class="on">Jugar</button>
+    <button data-t="P">Post-partida</button>
+    <button data-t="F">Perfil</button>
+    <button data-t="L">Lord</button>
+  </div>
+
+  <!-- ==================== TAB: JUGAR ==================== -->
+  <section id="tJ">
+    <div class="row" id="gameControls">
+      <select id="mode">
+        <option value="p">Práctica</option>
+        <option value="t">Reloj vs motor</option>
+        <option value="2">2 jugadores</option>
+      </select>
+      <button id="nw">Nueva partida</button>
+      <button id="fp">Girar</button>
+    </div>
+
+    <div class="row" id="rE">
+      <label>ELO: <b id="ev">1200</b></label>
+      <input id="elo" type="range" min="200" max="3000" step="50" value="1200">
+      <select id="col">
+        <option value="w">Blancas</option>
+        <option value="b">Negras</option>
+      </select>
+    </div>
+
+    <div class="row" id="rT">
+      <label>Blancas <input id="tw" type="number" min="1" max="180" value="5"> min</label>
+      <label>Negras <input id="tb" type="number" min="1" max="180" value="5"> min</label>
+      <label>+<input id="inc" type="number" min="0" max="60" value="0">s</label>
+    </div>
+
+    <div class="cap"><span id="tc"></span><b id="tk" class="clk"></b></div>
+
+    <div id="wrap">
+      <div id="rk"></div>
+      <div id="bd"></div>
+      <div id="fl"></div>
+      <button id="lk" title="Fijar pantalla">🔓</button>
+    </div>
+
+    <div class="cap"><span id="bc"></span><b id="bk" class="clk"></b></div>
+    <div id="bar"><i></i></div>
+    <div id="pts"></div>
+    <div class="card" id="op" style="display:none"></div>
+
+    <div class="row" id="nv">
+      <button data-n="s">⏮</button>
+      <button data-n="b">◀</button>
+      <button data-n="f">▶</button>
+      <button data-n="e">⏭</button>
+      <span id="pl"></span>
+    </div>
+
+    <div class="card" id="ex" style="display:none"></div>
+    <div id="res">Tu turno</div>
+
+    <div class="row" id="actions">
+      <button id="rb" style="display:none">Ver informe</button>
+      <button id="rs">Rendirse</button>
+      <button id="hi">Pista</button>
+      <button id="ud">Deshacer</button>
+      <button id="th">Amenazas</button>
+    </div>
+
+    <div class="card" id="lst"></div>
+  </section>
+
+  <!-- ==================== TAB: POST-PARTIDA ==================== -->
+  <section id="tP" style="display:none">
+    <div class="card" id="hd"></div>
+    <div class="card" id="gc" style="position:relative">
+      <b>Evolución de la partida</b>
+      <div id="gr"></div>
+      <small>Mantén pulsado para ver el detalle (desliza el dedo) · toca 4 veces seguidas un círculo para ir a esa jugada</small>
+      <div id="gtip" style="display:none"></div>
+    </div>
+    <div class="card" id="phs"></div>
+    <div class="card" id="pcs"></div>
+    <div class="card"><table id="stt"></table><small>Precisión y puntuación son aproximadas.</small></div>
+    <div class="card" id="km"></div>
+  </section>
+
+  <!-- ==================== TAB: PERFIL ==================== -->
+  <section id="tF" style="display:none"></section>
+
+  <!-- ==================== TAB: LORD ==================== -->
+  <section id="tL" style="display:none">
+    <div class="card">
+      <b>Lord</b> · entrenador con chat<br>
+      <select id="lsel" style="width:100%;margin-top:6px"></select>
+    </div>
+    <div id="lm"></div>
+    <div id="lch"></div>
+    <div class="row">
+      <textarea id="li" rows="2" placeholder="Pregunta a Lord sobre esta jugada…"></textarea>
+      <button id="ls">Enviar</button>
+    </div>
+    <div class="card">
+      <b>Futuros alternativos</b>
+      <small>(holograma: rojo peligro · cian mejor · violeta alternativa · verde oportunidad)</small>
+      <div id="hfc" class="row" style="margin-top:6px"></div>
+      <div id="hb"></div>
+      <div class="row" id="hct">
+        <button data-h="s">⏮</button>
+        <button data-h="b">◀</button>
+        <button data-h="f">▶</button>
+        <button data-h="p" id="hp">⏵</button>
+      </div>
+      <div id="hl" style="font-size:14px"></div>
+    </div>
+  </section>
+
+  <button id="gear" title="Ajustes">⚙</button>
+  <button id="fs" title="Pantalla completa">⛶</button>
+</main>
+
+<!-- Contenedor del modal de ajustes (lo puebla SettingsView) -->
+<div id="sp"></div>
+
+<div id="boot-error" style="display:none;padding:24px;font:16px system-ui,sans-serif">
+  <b>No se pudo iniciar la aplicación.</b>
+  <p>Este proyecto usa módulos ES. Ábrelo con un servidor local:</p>
+  <pre>python3 -m http.server 8000</pre>
+  <p>y visita <code>http://localhost:8000</code></p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script>
+  window.setTimeout(function () {
+    if (!window.__APP_STARTED__) {
+      var el = document.getElementById('boot-error');
+      if (el) el.style.display = 'block';
+    }
+  }, 2000);
+</script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

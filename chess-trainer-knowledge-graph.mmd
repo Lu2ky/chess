@@ -1,0 +1,886 @@
+%% Chess Trainer - Knowledge Graph
+%% Multiple diagrams representing the architecture, components, and flows
+
+---
+config:
+  theme: base
+  themeVariables:
+    primaryColor: "#2e7d32"
+    secondaryColor: "#b58863"
+    tertiaryColor: "#f0d9b5"
+    background: "#ffffff"
+    fontFamily: "system-ui, sans-serif"
+---
+
+%% ============================================================================
+%% C4 CONTEXT DIAGRAM - System Overview
+%% ============================================================================
+
+```mermaid
+C4Context
+    title Chess Trainer - System Context
+
+    Person(user, "Usuario", "Juega, analiza, aprende")
+    
+    System_Boundary(app, "Entrenador de Ajedrez") {
+        System(chessApp, "App Principal", "HTML/JS vanilla - Single file")
+    }
+    
+    System_Ext(chessjs, "chess.js", "Librería reglas + FEN/PGN")
+    System_Ext(localStorage, "localStorage", "Persistencia perfil + ajustes")
+    System_Ext(claude, "Claude API (opcional)", "Análisis IA 'Lord' via window.claude")
+    
+    Rel(user, chessApp, "Interacciona")
+    Rel(chessApp, chessjs, "Usa para reglas/validación")
+    Rel(chessApp, localStorage, "Guarda/carga perfil y ajustes")
+    Rel(chessApp, claude, "Consulta análisis Lord")
+```
+
+%% ============================================================================
+%% C4 CONTAINER DIAGRAM - Internal Architecture
+%% ============================================================================
+
+```mermaid
+C4Container
+    title Chess Trainer - Container Diagram
+
+    Container_Boundary(app, "Entrenador de Ajedrez") {
+        Container(ui, "UI Layer", "HTML + CSS Custom Properties", "Tablero, paneles, ajustes, chat")
+        Container(engine, "Motor de Ajedrez", "JS vanilla - Minimax + Alpha-Beta", "Evaluación, búsqueda, clasificación jugadas")
+        Container(state, "Estado del Juego", "JS Objects + chess.js instance", "Posición, historial, reloj, modo")
+        Container(persistence, "Persistencia", "localStorage API", "Perfil, ajustes, aperturas")
+        Container(ai, "Lord (IA)", "window.claude.sample()", "Chat análisis + hologramas futuros")
+    }
+    
+    Container_Ext(chessjs, "chess.js", "CDN", "Reglas, FEN, PGN, movimientos")
+    
+    Rel(ui, engine, "Solicita mejor jugada / evalúa")
+    Rel(ui, state, "Lee/escribe estado")
+    Rel(state, chessjs, "Delegar reglas")
+    Rel(engine, chessjs, "Genera movimientos legales")
+    Rel(ui, persistence, "Carga/guarda")
+    Rel(ui, ai, "Envía contexto + pregunta")
+    Rel(ai, chessjs, "Simula posiciones FEN")
+```
+
+%% ============================================================================
+%% CLASS DIAGRAM - Core Domain Model
+%% ============================================================================
+
+```mermaid
+classDiagram
+    %% Core Entities
+    class ChessGame {
+        +Chess g
+        +number gN
+        +number vp
+        +Move ghost
+        +string mode
+        +string me
+        +string view
+        +boolean busy
+        +boolean ended
+        +boolean clockOn
+        +string sel
+        +string[] last
+        +MoveLog[] log
+        +number[] evH
+        +number advW
+        +Time t
+        +number lt
+        +Time tinit
+        +string lastTxt
+        +MoveLog[] mem
+        +reset()
+        +move(Move)
+        +undo()
+        +history()
+        +board()
+        +fen()
+        +pgn()
+        +game_over()
+        +in_checkmate()
+        +turn()
+    }
+    
+    class Move {
+        +string from
+        +string to
+        +string piece
+        +string captured
+        +string promotion
+        +string san
+        +string flags
+    }
+    
+    class MoveLog {
+        +string san
+        +string label
+        +string color
+        +number ply
+        +number loss
+        +string best
+        +BestMove bm
+        +number acc
+        +string piece
+        +string phase
+        +boolean quiet
+        +string cs
+        +string why
+    }
+    
+    class BestMove {
+        +string from
+        +string to
+        +string piece
+        +string san
+    }
+    
+    class Time {
+        +number w
+        +number b
+    }
+    
+    class Stats {
+        +number Genial
+        +number Excelente
+        +number Bueno
+        +number Libro
+        +number Inexactitud
+        +number Error
+        +number Fallo
+        +number pts
+        +number[] acc
+    }
+    
+    class ProfileEntry {
+        +Object cc
+        +number d
+        +string res
+        +string mode
+        +number elo
+        +number acc
+        +number rating
+        +SkillRatings sk
+        +LabelCounts lb
+        +PiecePerf pc
+        +string on
+        +string op
+        +number opAcc
+    }
+    
+    class SkillRatings {
+        +number ap
+        +number ta
+        +number es
+        +number fi
+        +number ti
+    }
+    
+    class LabelCounts {
+        +number Genial
+        +number Excelente
+        +number Bueno
+        +number Libro
+        +number Inexactitud
+        +number Error
+        +number Fallo
+    }
+    
+    class PiecePerf {
+        +number c
+        +number s
+    }
+    
+    class Config {
+        +string lc
+        +string dc
+        +string hl
+        +string ac
+        +boolean co
+        +boolean mvd
+        +string wc
+        +string bc
+        +string wo
+        +string bo
+        +boolean sh
+        +number ps
+        +string th
+        +number fz
+        +boolean cp
+        +boolean bar
+        +boolean cap
+        +boolean lst
+        +boolean opn
+        +boolean snd
+        +boolean vib
+        +number hold
+        +boolean flip
+        +number d_elo
+        +string d_col
+        +string d_mode
+        +number d_tm
+        +number d_inc
+        +string bst
+        +boolean bacc
+        +string bcol
+        +number brad
+        +number bpad
+        +boolean bsh
+        +boolean bbold
+        +SpriteConfig sp
+    }
+    
+    class SpriteConfig {
+        +string wk
+        +string wq
+        +... (12 keys)
+    }
+    
+    %% Engine Classes
+    class Engine {
+        +Object V
+        +Object P
+        +Object G
+        +Object W
+        +string[] L
+        +Object CO
+        +Object BK
+        +Object OBN
+        +number QD
+        +number qg
+        +Object hist
+        +number hn
+        +number hs
+        +boolean tOn
+        +number gid
+        +boolean lock
+        +boolean fs
+        +ev()
+        +qs(a,b,k)
+        +nm(d,a,b)
+        +scoreAll(D)
+        +cause(c,pm)
+        +threats()
+        +setAdv()
+        +classify(all,pm)
+        +engineMove()
+    }
+    
+    class OpeningBook {
+        +string OB
+        +Set BK
+        +Object OBN
+        +posKey(c)
+        +inBk(m)
+        +opInfo()
+        +opName()
+        +opTxt()
+    }
+    
+    class LordAI {
+        +string INSTR
+        +MoveLog lsample
+        +Object[] chat
+        +MoveLog lmove
+        +boolean lbusy
+        +Future[] hf
+        +number hi
+        +number hk
+        +number htimer
+        +number hwarn
+        +getS()
+        +fenAt(ply)
+        +ctxMove(l)
+        +ctxGame()
+        +send(q)
+        +setFuturos(text,l)
+        +drawH()
+        +stopH()
+    }
+    
+    class Future {
+        +string nombre
+        +string tipo
+        +string base
+        +MoveVariation[] mv
+    }
+    
+    class MoveVariation {
+        +string san
+        +string from
+        +string to
+        +string fen
+    }
+    
+    %% Relationships
+    ChessGame *-- MoveLog : "log[]"
+    ChessGame *-- Time : "t"
+    ChessGame *-- Stats : "st{w,b}"
+    ChessGame *-- Move : "last[]"
+    ChessGame *-- Move : "ghost"
+    ChessGame *-- MoveLog : "mem[]"
+    ChessGame --> Engine : "usa"
+    ChessGame --> OpeningBook : "consulta"
+    ChessGame --> LordAI : "delega análisis"
+    ChessGame --> Config : "configura"
+    ChessGame --> ProfileEntry : "guarda en perfil"
+    ProfileEntry *-- SkillRatings : "sk"
+    ProfileEntry *-- LabelCounts : "lb"
+    ProfileEntry *-- PiecePerf : "pc"
+    LordAI *-- Future : "hf[]"
+    Future *-- MoveVariation : "mv[]"
+    ChessGame --> ChessGame : "delegar reglas"
+```
+
+%% ============================================================================
+%% FLOWCHART - Game Flow (Main Loop)
+%% ============================================================================
+
+```mermaid
+flowchart TD
+    subgraph Init[Inicialización]
+        A[Cargar config + perfil] --> B[Nueva partida\nnuevo()]
+        B --> C[Reset chess.js\nConfigurar reloj + modo]
+        C --> D[Render inicial\nrender()]
+    end
+    
+    subgraph UserTurn[Turno Usuario]
+        D --> E{Modo 2 jugadores\nO usuario = turno?}
+        E -->|Sí| F[Esperar click/arrastre\nclick() / drag]
+        E -->|No| EngineTurn
+        F --> G{Jugada legal?}
+        G -->|No| F
+        G -->|Sí| H[play(mv)]
+    end
+    
+    subgraph PlayAnalysis[Análisis Jugada]
+        H --> I[busy=true, clockOn=false]
+        I --> J[Ejecutar jugada\ng.move(m)]
+        J --> K[Deshacer + Analizar\nscoreAll(3) + classify()]
+        K --> L[Clasificar: Genial..Fallo\n+ causa + mejor jugada]
+        L --> M[Re-ejecutar jugada real\nsetAdv() + log.push()]
+        M --> N[render() + Actualizar UI]
+    end
+    
+    subgraph CheckEnd[Verificar Fin]
+        N --> O{over()?}
+        O -->|Jaque mate| P[finish(ganador, 'Jaque mate')]
+        O -->|Tablas| Q[finish(null, 'Tablas')]
+        O -->|Continúa| R{Modo?}
+    end
+    
+    subgraph EngineTurn[Turno Motor]
+        R -->|Práctica/Reloj| S[reply()]
+        S --> T[busy=true]
+        T --> U[engineMove()\nMinimax + ID]
+        U --> V[Ejecutar + setAdv()]
+        V --> W[render()]
+        W --> X{over()?}
+        X -->|Sí| P
+        X -->|No| Y[clockOn=true + busy=false]
+        Y --> D
+    end
+    
+    subgraph Clock[Reloj - cada 200ms]
+        Z[setInterval] --> AA{clockOn && !ended?}
+        AA -->|Sí| AB[Restar dt a turno actual]
+        AB --> AC{t <= 0?}
+        AC -->|Sí| AD[finish(opp, 'Tiempo')]
+        AC -->|No| AE[clk() actualiza UI]
+        AE --> Z
+    end
+    
+    subgraph PostGame[Post-partida]
+        P --> AF[done=true + save()]
+        Q --> AF
+        AF --> AG[Calcular stats\ncalc()]
+        AG --> AH[Guardar en perfil\nlocalStorage]
+        AH --> AI[Mostrar botón 'Ver informe']
+    end
+    
+    style Init fill:#e8f5e9
+    style UserTurn fill:#fff3e0
+    style PlayAnalysis fill:#e3f2fd
+    style CheckEnd fill:#fce4ec
+    style EngineTurn fill:#f3e5f5
+    style Clock fill:#e0f2f1
+    style PostGame fill:#f1f8e9
+```
+
+%% ============================================================================
+%% FLOWCHART - Engine Search (Minimax + Iterative Deepening)
+%% ============================================================================
+
+```mermaid
+flowchart TD
+    subgraph EngineMove[engineMove()]
+        A[scoreAll(depth)] --> B[Iterative Deepening\nd=1..depth]
+        B --> C[Para cada d:\n  hist={}\n  ms=movimientos legales\n  ordenar por hist + capturas]
+        C --> D[Para cada movimiento:\n  qg=300\n  g.move(m)\n  s=-nm(d-1,-inf,+inf)\n  g.undo()]
+        D --> E[Retornar array {m,s}\nordenado por score]
+    end
+    
+    subgraph Negamax[nm(d,a,b)]
+        F{d==0?} -->|Sí| G[qs(a,b,QD)]
+        F -->|No| H[ms=movimientos\nordenar por hist]
+        H --> I[Para cada m:\n  g.move(m)\n  s=-nm(d-1,-b,-a)\n  g.undo()]
+        I --> J{s>=b?}
+        J -->|Sí| K[hist[key]+=d*d\nreturn b]
+        J -->|No| L{s>a? a=s}
+        L --> M[return a]
+    end
+    
+    subgraph Quiescence[qs(a,b,k)]
+        N{c=in_check?} -->|Sí| O[ms=solo capturas/evasiones]
+        N -->|No| P[s=ev()\nstand-pat\nif s>=b return b\nif s>a a=s]
+        P --> O
+        O --> Q{k<=0 or qg<=0?}
+        Q -->|Sí| R[return c?ev():a]
+        Q -->|No| S[qg--\nfiltrar capturas/promos\nordenar]
+        S --> T[Para cada m:\n  poda delta si !c\n  g.move(m)\n  v=-qs(-b,-a,k-1)\n  g.undo()]
+        T --> U{v>=b? return b\nv>a? a=v}
+        U --> V[return a]
+    end
+    
+    subgraph Evaluation[ev()]
+        W[Recorrer tablero 8x8] --> X[Material base V[]]
+        X --> Y[Bonus centralidad\nC=3.5-max(|r-3.5|,|c-3.5|)]
+        Y --> Z[Bonus peones\n(p.color==w?6-r:r-1)*4]
+        Z --> AA[Suma con signo\nw:+ b:-]
+        AA --> AB[return turn==w?s:-s]
+    end
+    
+    subgraph Classify[classify(all,pm)]
+        AC[best=max(all.s)\nloss=clamp(best-pm.s)] --> AD{loss<=15 && pieza mayor\n  colgada?}
+        AD -->|Sí| AE[Genial]
+        AD -->|No| AF{En libro BK?}
+        AF -->|Sí| AG[Libro]
+        AF -->|No| AH[Tabla umbrales:\n<=10 Excelente\n<=40 Bueno\n<=100 Inexactitud\n<=250 Error\n>250 Fallo]
+        AH --> AI[cause() detecta:\nMate, pieza colgada,\ncaptura perdida, táctica]
+        AI --> AJ[Retornar {label,loss,m,best,bm,cs}]
+    end
+    
+    style EngineMove fill:#e8f5e9
+    style Negamax fill:#fff3e0
+    style Quiescence fill:#e3f2fd
+    style Evaluation fill:#fce4ec
+    style Classify fill:#f3e5f5
+```
+
+%% ============================================================================
+%% SEQUENCE DIAGRAM - Lord AI Analysis Flow
+%% ============================================================================
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant UI as UI Layer
+    participant Lord as LordAI
+    participant Claude as window.claude
+    participant Chess as chess.js
+    participant State as Game State
+    
+    U->>UI: Click "Lord" en jugada / Tab Lord
+    UI->>Lord: openLord(i) / send(q)
+    Lord->>State: ctxMove(l) o ctxGame()
+    State->>Chess: fenAt(ply) / g.fen() / g.pgn()
+    Chess-->>State: FEN / PGN
+    State-->>Lord: Contexto formateado
+    Lord->>Claude: sample(messages, {cache:false, onText})
+    Note over Lord,Claude: INSTR + contexto + pregunta
+    Claude-->>Lord: Stream chunks
+    Lord->>UI: addMsg('a', texto parcial)
+    Lord->>Lord: Parse <<FUTUROS>> JSON
+    Lord->>Lord: setFuturos() -> validar FEN + jugadas
+    Lord->>UI: drawH() - render holograma
+    UI->>U: Respuesta + botones futuros + tablero holograma
+    
+    alt Usuario navega futuros
+        U->>UI: Click ◀ ▶ ⏵ en holograma
+        UI->>Lord: drawH() con hk actualizado
+        Lord->>Chess: Simular FEN base + jugadas
+        Chess-->>Lord: Tableros resultantes
+        Lord->>UI: Actualizar tablero holograma + lista jugadas
+    end
+```
+
+%% ============================================================================
+%% ERD - Data Persistence (localStorage)
+%% ============================================================================
+
+```mermaid
+erDiagram
+    AJ_PERFIL ||--o{ PROFILE_ENTRY : contains
+    AJ_PERFIL ||--o{ SAVED_CONFIG : contains
+    
+    AJ_PERFIL {
+        string key PK "aj_perfil"
+        json value "Array<ProfileEntry>"
+    }
+    
+    PROFILE_ENTRY {
+        json cc "Errores comunes {tipo:count}"
+        number d "Timestamp"
+        string res "W|D|L"
+        string mode "p|t|2"
+        number elo "ELO rival"
+        number acc "Precisión %"
+        number rating "Rating estimado"
+        json sk "SkillRatings {ap,ta,es,fi,ti}"
+        json lb "LabelCounts {Genial..Fallo}"
+        json pc "PiecePerf {piece:{c,s}}"
+        string on "Nombre apertura"
+        string op "Primeras 3 jugadas"
+        number opAcc "Precisión apertura"
+    }
+    
+    AJ_CFG {
+        string key PK "aj_cfg"
+        json value "Config object"
+    }
+    
+    AJ_DEF {
+        string key PK "aj_def"
+        json value "Config defaults"
+    }
+    
+    AJ_PERF {
+        string key PK "aj_perf"
+        json value "Array<{n:string, c:Config}>"
+    }
+    
+    SAVED_CONFIG {
+        string n "Nombre"
+        json c "Config completo"
+    }
+    
+    OPENING_BOOK {
+        string key "OB (const)"
+        string value "ECO|Nombre|Movimientos SAN"
+    }
+```
+
+%% ============================================================================
+%% STATE DIAGRAM - Game States
+%% ============================================================================
+
+```mermaid
+stateDiagram-v2
+    [*] --> Inicializando : nuevo()
+    Inicializando --> EsperandoUsuario : Modo 2J o user=turno
+    Inicializando --> TurnoMotor : Modo práctica/reloj + user!=turno
+    
+    state EsperandoUsuario {
+        [*] --> SeleccionandoPieza : click pieza propia
+        SeleccionandoPieza --> SeleccionandoDestino : click/arrastre
+        SeleccionandoDestino --> JugadaLegal : drop en mv[]
+        SeleccionandoDestino --> SeleccionandoPieza : click otra pieza
+        SeleccionandoDestino --> EsperandoUsuario : click vacío/ilegal
+        JugadaLegal --> Analizando : play(mv)
+    }
+    
+    state TurnoMotor {
+        [*] --> Calculando : reply()
+        Calculando --> Ejecutando : engineMove()
+        Ejecutando --> ActualizandoUI : render()
+        ActualizandoUI --> VerificandoFin
+    }
+    
+    Analizando --> VerificandoFin : classification + log push
+    
+    state VerificandoFin {
+        [*] --> JaqueMate : in_checkmate()
+        [*] --> Tablas : game_over() && !mate
+        [*] --> Continuar : !game_over()
+        JaqueMate --> Finalizado : finish(winner)
+        Tablas --> Finalizado : finish(null)
+        Continuar --> EsperandoUsuario : modo 2J o user=turno
+        Continuar --> TurnoMotor : modo práctica/reloj
+    }
+    
+    Finalizado --> PostPartida : save() + stats
+    PostPartida --> [*] : Usuario navega tabs
+    
+    %% Clock timeout transition
+    EsperandoUsuario --> TiempoAgotado : clock tick t<=0
+    TurnoMotor --> TiempoAgotado : clock tick t<=0
+    TiempoAgotado --> Finalizado : finish(opp)
+    
+    %% Undo (solo práctica)
+    EsperandoUsuario --> Deshaciendo : ud() + modo=p
+    Deshaciendo --> EsperandoUsuario : undo 2 plies + pop log
+    
+    %% Navigation (vp != null)
+    EsperandoUsuario --> ViendoHistorial : nav(b/f/s/e) o click lista
+    ViendoHistorial --> EsperandoUsuario : nav(e) o click 'Ir'
+    TurnoMotor --> ViendoHistorial : nav(b/f/s/e)
+    ViendoHistorial --> TurnoMotor : nav(e)
+    
+    %% Lord analysis
+    EsperandoUsuario --> AnalisisLord : click Lord / tab L
+    AnalisisLord --> EsperandoUsuario : cerrar / volver a J
+    TurnoMotor --> AnalisisLord : tab L
+    AnalisisLord --> TurnoMotor : volver a J
+```
+
+%% ============================================================================
+%% COMPONENT DIAGRAM - UI Components
+%% ============================================================================
+
+```mermaid
+classDiagram
+    %% UI Components (as conceptual classes)
+    class TabJugar {
+        +select#mode
+        +button#nw
+        +button#fp
+        +input#elo
+        +select#col
+        +inputs#tw#tb#inc
+        +div#wrap (tablero)
+        +div#cap captured
+        +div#bar advantage
+        +div#pts score
+        +div#op opening
+        +nav#nv buttons
+        +div#ex explanation
+        +div#res result
+        +buttons#rb#rs#hi#ud#th
+        +div#lst move list
+    }
+    
+    class TabPostpartida {
+        +div#hd header
+        +div#gc graph container
+        +svg#gr evaluation graph
+        +div#gtip tooltip
+        +div#phs phase bars
+        +div#pcs piece performance
+        +table#stt stats table
+        +div#km key moments
+    }
+    
+    class TabPerfil {
+        +div#tF profile container
+        +radar skills
+        +sparkline rating history
+        +piece performance table
+        +openings table
+        +total moves tags
+        +common errors
+        +button#clr
+    }
+    
+    class TabLord {
+        +select#lsel move selector
+        +div#lm chat log
+        +div#lch quick questions
+        +textarea#li input
+        +button#ls send
+        +div#hfc future chips
+        +div#hb hologram board
+        +nav#hct hologram controls
+        +div#hl future description
+    }
+    
+    class SettingsModal {
+        +details#board colors/coords
+        +details#pieces colors/outlines/size
+        +details#interface theme/font/compact
+        +details#buttons style/color/size
+        +details#game sound/vib/hold/flip/defaults
+        +details#sprites piece images upload
+        +details#presets save/load/export/import
+        +details#data reset/factory
+    }
+    
+    class BoardRenderer {
+        +render()
+        +click(sq)
+        +pieceEl(c,t)
+        +drag handlers
+        +threats display
+        +last move highlight
+        +ghost move preview
+        +hologram overlay
+    }
+    
+    class GraphRenderer {
+        +graph() SVG polyline + dots
+        +spark() SVG mini chart
+        +radar() SVG polygon
+    }
+    
+    class ClockManager {
+        +clk() update displays
+        +setInterval 200ms tick
+        +time loss detection
+        +increment on move
+    }
+    
+    class OpeningDetector {
+        +opInfo() scan history
+        +opName() current opening
+        +opTxt() formatted card
+        +BK Set book keys
+        +OBN map metadata
+    }
+    
+    %% Relationships
+    TabJugar --> BoardRenderer : usa
+    TabJugar --> ClockManager : usa
+    TabJugar --> OpeningDetector : usa
+    TabPostpartida --> GraphRenderer : usa
+    TabPerfil --> GraphRenderer : usa
+    TabLord --> BoardRenderer : holograma
+    SettingsModal --> BoardRenderer : ap() aplica CSS vars
+    BoardRenderer --> ChessGame : read state
+    GraphRenderer --> ChessGame : read evH + log
+```
+
+%% ============================================================================
+%% FLOWCHART - Settings / Configuration Flow
+%% ============================================================================
+
+```mermaid
+flowchart TD
+    A[Click ⚙ gear] --> B[openSet()]
+    B --> C{Render SP modal\ncon details por sección}
+    C --> D[UI array define\n5 secciones + presets]
+    
+    subgraph Sections[Secciones]
+        D --> E[Tablero\nPresets PB + controles]
+        D --> F[Piezas\nPresets PP + colores/outline/size]
+        D --> G[Interfaz\nTema, fuente, compacto, toggles]
+        D --> H[Botones\nEstilo, acento, color, tamaño, sombra]
+        D --> I[Juego\nSonido, vib, hold, flip, defaults]
+        D --> J[Sprites\nUpload PNG por pieza\nCopy/clear]
+        D --> K[Mis ajustes\nSave/load named presets]
+        D --> L[Datos\nDefaults, reset, export/import]
+    end
+    
+    subgraph Controls[Tipos Control ctl()]
+        M[Color picker] --> N[data-k=lc/dc/hl/ac/wc/bc/wo/bo/bcol]
+        O[Checkbox] --> P[data-k=co/mvd/sh/cp/bar/cap/lst/opn/snd/vib/flip/bacc/bsh/bbold/bacc]
+        Q[Range] --> R[data-k=ps/fz/hold/brad/bpad/d_elo/d_tm/d_inc]
+        S[Select] --> T[data-k=th/bst/d_col/d_mode]
+    end
+    
+    subgraph Events[Eventos SP]
+        U[input/change] --> V{data-sp?}
+        V -->|Sí| W[FileReader -> Image -> Canvas\ntoDataURL -> CF.sp[key] -> rf()]
+        V -->|No| X[CF[key]=value\nsv() -> ap()\nif flip -> render()]
+    end
+    
+    subgraph Buttons[Botones acción data-x]
+        Y[close] --> Z{dirty?}
+        Z -->|Sí| AA[Confirmar guardar/descartar]
+        Z -->|No| AB[SP.style.display=none]
+        AC[save] --> AD[ls('aj_cfg',CF)\ndirty=false]
+        AE[setdef] --> AF[ls('aj_def',CF)\ncommit()]
+        AG[fact] --> AH[CF=DF\nsv() -> ap() -> openSet() -> render()]
+        AI[pnew] --> AJ[ls('aj_perf', [{n,c:CF}])]
+        AK[ld] --> AL[CF=DF+preset.c\nsv() -> ap() -> openSet() -> render()]
+        AM[dl] --> AN[ls('aj_perf').splice() -> plHtml()]
+        AO[newg] --> AP[startVals() -> SP.hide() -> nuevo()]
+        AQ[reset] --> AR[CF=DF+aj_def -> sv() -> ap() -> openSet() -> render()]
+        AS[exp] --> AT[$('spj').value=JSON.stringify(CF)]
+        AU[imp] --> AV[parse JSON -> merge DF keys -> sv() -> ap() -> render()]
+        AW[clall] --> AX[CF.sp={} -> rf()]
+        AY[pb/pp] --> AZ[Apply preset colors -> upd()]
+        BA[cp] --> BB[Copy sprites W->B or B->W -> rf()]
+        BC[cl] --> BD[delete CF.sp[key] -> rf()]
+    end
+    
+    style Sections fill:#e8f5e9
+    style Controls fill:#fff3e0
+    style Events fill:#e3f2fd
+    style Buttons fill:#fce4ec
+```
+
+%% ============================================================================
+%% MIND MAP - Feature Map
+%% ============================================================================
+
+```mermaid
+mindmap
+  root((Entrenador\nde Ajedrez))
+    Jugar
+      Modos
+        Práctica
+        Reloj vs Motor
+        2 Jugadores
+      Motor
+        Minimax Alpha-Beta
+        Profundidad Iterativa
+        Quiescencia
+        Historial Heurístico
+        Evaluación Posicional
+      Clasificación
+        Genial/Excelente/Bueno
+        Libro/Inexactitud
+        Error/Fallo
+        Detección Causa
+      UI Tablero
+        Coordenadas
+        Arrastre Touch/Mouse
+        Resaltado Legal/Última/Amenazas
+        Ghost Move / Holograma
+        Pista + Amenazas
+        Deshacer (Práctica)
+      Reloj
+        Fischer Increment
+        Tiempo Agotado
+        Pausa en análisis
+    Post-partida
+      Gráfica Evaluación
+        SVG Polyline + Dots
+        Hold 400ms + 4-tap goto
+      Estadísticas
+        Por fase Apertura/Medio/Final
+        Precisión + Rating estimado
+        Por etiqueta Genial..Fallo
+      Momentos Clave
+        Top 3 pérdidas >100cp
+      Rendimiento Pieza
+        Precisión por tipo pieza
+    Perfil
+      Radar Habilidades
+        Apertura/Táctica/Estrategia/Finales/Tiempo
+        EMA ponderada 0.7/0.3
+      Sparkline Rating
+      Aperturas Jugadas
+        Win/Draw/Loss + Precisión
+      Errores Comunes
+        Conteo por causa
+    Lord IA
+      Chat Contextual
+        Posición Antes/Después
+        PGN Completo
+        Etiquetas + Justificación
+      Futuros Holograma
+        4 Tipos: Peligro/Mejor/Alternativa/Oportunidad
+        Max 3 líneas x 6 semijugadas
+        Validación legalidad
+        Animación ⏵ + Navegación ◀▶⏮⏭
+      Preguntas Rápidas
+        Contexto: Jugada o Partida
+    Ajustes
+      5 Categorías + Presets
+      Sprites Piezas Custom
+      Presets Nombrados
+      Export/Import JSON
+      Defaults Usuario/Fábrica
+    Persistencia
+      localStorage
+      aj_perfil (partidas)
+      aj_cfg (config actual)
+      aj_def (defaults usuario)
+      aj_perf (presets nombrados)
+    Libro Aperturas
+      200+ Líneas ECO
+      Validación al cargar
+      Detección en tiempo real
+      Fuera de libro indicator
+```

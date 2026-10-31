@@ -1,0 +1,22 @@
+/* ============================================================
+   postgame.css — gráfica de evolución, tooltip y perfiles
+   ============================================================ */
+
+#gr {
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+#gtip {
+  position: absolute;
+  z-index: 5;
+  background: #000d;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  pointer-events: none;
+  white-space: nowrap;
+}

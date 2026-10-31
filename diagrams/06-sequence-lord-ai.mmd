@@ -1,0 +1,33 @@
+%% Chess Trainer - Sequence Diagram
+%% Lord AI Analysis Flow
+
+sequenceDiagram
+    participant U as Usuario
+    participant UI as UI Layer
+    participant Lord as LordAI
+    participant Claude as window.claude
+    participant Chess as chess.js
+    participant State as Game State
+    
+    U->>UI: Click "Lord" en jugada / Tab Lord
+    UI->>Lord: openLord(i) / send(q)
+    Lord->>State: ctxMove(l) o ctxGame()
+    State->>Chess: fenAt(ply) / g.fen() / g.pgn()
+    Chess-->>State: FEN / PGN
+    State-->>Lord: Contexto formateado
+    Lord->>Claude: sample(messages, {cache:false, onText})
+    Note over Lord,Claude: INSTR + contexto + pregunta
+    Claude-->>Lord: Stream chunks
+    Lord->>UI: addMsg('a', texto parcial)
+    Lord->>Lord: Parse <<FUTUROS>> JSON
+    Lord->>Lord: setFuturos() -> validar FEN + jugadas
+    Lord->>UI: drawH() - render holograma
+    UI->>U: Respuesta + botones futuros + tablero holograma
+    
+    alt Usuario navega futuros
+        U->>UI: Click ◀ ▶ ⏵ en holograma
+        UI->>Lord: drawH() con hk actualizado
+        Lord->>Chess: Simular FEN base + jugadas
+        Chess-->>Lord: Tableros resultantes
+        Lord->>UI: Actualizar tablero holograma + lista jugadas
+    end

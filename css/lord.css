@@ -1,0 +1,59 @@
+/* ============================================================
+   lord.css — chat del entrenador
+   ============================================================ */
+
+#lm {
+  max-height: 48vh;
+  overflow-y: auto;
+  margin: 8px 0;
+}
+
+.bu {
+  max-width: 88%;
+  padding: 8px 12px;
+  border-radius: 14px;
+  margin: 6px 0;
+  white-space: pre-wrap;
+  line-height: 1.4;
+  font-size: 15px;
+}
+
+.bu.u {
+  background: var(--ac, #2e7d32);
+  color: #fff;
+  margin-left: auto;
+  border-bottom-right-radius: 4px;
+}
+
+.bu.a {
+  background: var(--card);
+  border-bottom-left-radius: 4px;
+}
+
+.bu.a::before {
+  content: "Lord";
+  display: block;
+  font-weight: 700;
+  font-size: 12px;
+  opacity: .6;
+}
+
+#li {
+  flex: 1;
+  font: inherit;
+  padding: 6px 10px;
+  border-radius: 10px;
+  resize: none;
+  min-width: 0;
+}
+
+#lch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+#lch .mini {
+  margin: 0;
+}

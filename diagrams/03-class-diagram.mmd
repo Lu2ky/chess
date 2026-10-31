@@ -1,0 +1,266 @@
+%% Chess Trainer - Class Diagram
+%% Core Domain Model
+
+classDiagram
+    %% Core Entities
+    class ChessGame {
+        +Chess g
+        +number gN
+        +number vp
+        +Move ghost
+        +string mode
+        +string me
+        +string view
+        +boolean busy
+        +boolean ended
+        +boolean clockOn
+        +string sel
+        +string[] last
+        +MoveLog[] log
+        +number[] evH
+        +number advW
+        +Time t
+        +number lt
+        +Time tinit
+        +string lastTxt
+        +MoveLog[] mem
+        +reset()
+        +move(Move)
+        +undo()
+        +history()
+        +board()
+        +fen()
+        +pgn()
+        +game_over()
+        +in_checkmate()
+        +turn()
+    }
+    
+    class Move {
+        +string from
+        +string to
+        +string piece
+        +string captured
+        +string promotion
+        +string san
+        +string flags
+    }
+    
+    class MoveLog {
+        +string san
+        +string label
+        +string color
+        +number ply
+        +number loss
+        +string best
+        +BestMove bm
+        +number acc
+        +string piece
+        +string phase
+        +boolean quiet
+        +string cs
+        +string why
+    }
+    
+    class BestMove {
+        +string from
+        +string to
+        +string piece
+        +string san
+    }
+    
+    class Time {
+        +number w
+        +number b
+    }
+    
+    class Stats {
+        +number Genial
+        +number Excelente
+        +number Bueno
+        +number Libro
+        +number Inexactitud
+        +number Error
+        +number Fallo
+        +number pts
+        +number[] acc
+    }
+    
+    class ProfileEntry {
+        +Object cc
+        +number d
+        +string res
+        +string mode
+        +number elo
+        +number acc
+        +number rating
+        +SkillRatings sk
+        +LabelCounts lb
+        +PiecePerf pc
+        +string on
+        +string op
+        +number opAcc
+    }
+    
+    class SkillRatings {
+        +number ap
+        +number ta
+        +number es
+        +number fi
+        +number ti
+    }
+    
+    class LabelCounts {
+        +number Genial
+        +number Excelente
+        +number Bueno
+        +number Libro
+        +number Inexactitud
+        +number Error
+        +number Fallo
+    }
+    
+    class PiecePerf {
+        +number c
+        +number s
+    }
+    
+    class Config {
+        +string lc
+        +string dc
+        +string hl
+        +string ac
+        +boolean co
+        +boolean mvd
+        +string wc
+        +string bc
+        +string wo
+        +string bo
+        +boolean sh
+        +number ps
+        +string th
+        +number fz
+        +boolean cp
+        +boolean bar
+        +boolean cap
+        +boolean lst
+        +boolean opn
+        +boolean snd
+        +boolean vib
+        +number hold
+        +boolean flip
+        +number d_elo
+        +string d_col
+        +string d_mode
+        +number d_tm
+        +number d_inc
+        +string bst
+        +boolean bacc
+        +string bcol
+        +number brad
+        +number bpad
+        +boolean bsh
+        +boolean bbold
+        +SpriteConfig sp
+    }
+    
+    class SpriteConfig {
+        +string wk
+        +string wq
+        +... (12 keys)
+    }
+    
+    %% Engine Classes
+    class Engine {
+        +Object V
+        +Object P
+        +Object G
+        +Object W
+        +string[] L
+        +Object CO
+        +Object BK
+        +Object OBN
+        +number QD
+        +number qg
+        +Object hist
+        +number hn
+        +number hs
+        +boolean tOn
+        +number gid
+        +boolean lock
+        +boolean fs
+        +ev()
+        +qs(a,b,k)
+        +nm(d,a,b)
+        +scoreAll(D)
+        +cause(c,pm)
+        +threats()
+        +setAdv()
+        +classify(all,pm)
+        +engineMove()
+    }
+    
+    class OpeningBook {
+        +string OB
+        +Set BK
+        +Object OBN
+        +posKey(c)
+        +inBk(m)
+        +opInfo()
+        +opName()
+        +opTxt()
+    }
+    
+    class LordAI {
+        +string INSTR
+        +MoveLog lsample
+        +Object[] chat
+        +MoveLog lmove
+        +boolean lbusy
+        +Future[] hf
+        +number hi
+        +number hk
+        +number htimer
+        +number hwarn
+        +getS()
+        +fenAt(ply)
+        +ctxMove(l)
+        +ctxGame()
+        +send(q)
+        +setFuturos(text,l)
+        +drawH()
+        +stopH()
+    }
+    
+    class Future {
+        +string nombre
+        +string tipo
+        +string base
+        +MoveVariation[] mv
+    }
+    
+    class MoveVariation {
+        +string san
+        +string from
+        +string to
+        +string fen
+    }
+    
+    %% Relationships
+    ChessGame *-- MoveLog : "log[]"
+    ChessGame *-- Time : "t"
+    ChessGame *-- Stats : "st{w,b}"
+    ChessGame *-- Move : "last[]"
+    ChessGame *-- Move : "ghost"
+    ChessGame *-- MoveLog : "mem[]"
+    ChessGame --> Engine : "usa"
+    ChessGame --> OpeningBook : "consulta"
+    ChessGame --> LordAI : "delega análisis"
+    ChessGame --> Config : "configura"
+    ChessGame --> ProfileEntry : "guarda en perfil"
+    ProfileEntry *-- SkillRatings : "sk"
+    ProfileEntry *-- LabelCounts : "lb"
+    ProfileEntry *-- PiecePerf : "pc"
+    LordAI *-- Future : "hf[]"
+    Future *-- MoveVariation : "mv[]"
+    ChessGame --> ChessGame : "delegar reglas"

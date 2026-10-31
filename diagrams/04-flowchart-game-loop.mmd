@@ -1,0 +1,71 @@
+%% Chess Trainer - Flowchart
+%% Game Flow (Main Loop)
+
+flowchart TD
+    subgraph Init [Inicializacion]
+        A["Cargar config + perfil"] --> B["Nueva partida"]
+        B --> C["Reset chess.js / Configurar reloj + modo"]
+        C --> D["Render inicial"]
+    end
+    
+    subgraph UserTurn [Turno Usuario]
+        D --> E{"Modo 2 jugadores / usuario = turno?"}
+        E -->|Si| F["Esperar click/arrastre"]
+        E -->|No| EngineTurn
+        F --> G{"Jugada legal?"}
+        G -->|No| F
+        G -->|Si| H["play(mv)"]
+    end
+    
+    subgraph PlayAnalysis [Analisis Jugada]
+        H --> I["busy=true, clockOn=false"]
+        I --> J["Ejecutar jugada g.move(m)"]
+        J --> K["Deshacer + Analizar scoreAll(3) + classify()"]
+        K --> L["Clasificar: Genial..Fallo + causa + mejor jugada"]
+        L --> M["Re-ejecutar jugada real setAdv() + log.push()"]
+        M --> N["render() + Actualizar UI"]
+    end
+    
+    subgraph CheckEnd [Verificar Fin]
+        N --> O{"over()?"}
+        O -->|Jaque mate| P["finish(ganador, Jaque mate)"]
+        O -->|Tablas| Q["finish(null, Tablas)"]
+        O -->|Continua| R{"Modo?"}
+    end
+    
+    subgraph EngineTurn [Turno Motor]
+        R -->|Practica/Reloj| S["reply()"]
+        S --> T["busy=true"]
+        T --> U["engineMove() Minimax + ID"]
+        U --> V["Ejecutar + setAdv()"]
+        V --> W["render()"]
+        W --> X{"over()?"}
+        X -->|Si| P
+        X -->|No| Y["clockOn=true + busy=false"]
+        Y --> D
+    end
+    
+    subgraph Clock [Reloj - cada 200ms]
+        Z["setInterval"] --> AA{"clockOn && !ended?"}
+        AA -->|Si| AB["Restar dt a turno actual"]
+        AB --> AC{"t <= 0?"}
+        AC -->|Si| AD["finish(opp, Tiempo)"]
+        AC -->|No| AE["clk() actualiza UI"]
+        AE --> Z
+    end
+    
+    subgraph PostGame [Post-partida]
+        P --> AF["done=true + save()"]
+        Q --> AF
+        AF --> AG["Calcular stats calc()"]
+        AG --> AH["Guardar en perfil localStorage"]
+        AH --> AI["Mostrar boton Ver informe"]
+    end
+    
+    style Init fill:#e8f5e9
+    style UserTurn fill:#fff3e0
+    style PlayAnalysis fill:#e3f2fd
+    style CheckEnd fill:#fce4ec
+    style EngineTurn fill:#f3e5f5
+    style Clock fill:#e0f2f1
+    style PostGame fill:#f1f8e9

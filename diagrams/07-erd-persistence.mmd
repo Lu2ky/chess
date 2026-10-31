@@ -1,0 +1,52 @@
+%% Chess Trainer - ER Diagram
+%% Data Persistence (localStorage)
+
+erDiagram
+    AJ_PERFIL ||--o{ PROFILE_ENTRY : contains
+    AJ_PERFIL ||--o{ SAVED_CONFIG : contains
+    
+    AJ_PERFIL {
+        string key PK "aj_perfil"
+        json value "Array<ProfileEntry>"
+    }
+    
+    PROFILE_ENTRY {
+        json cc "Errores comunes {tipo:count}"
+        number d "Timestamp"
+        string res "W|D|L"
+        string mode "p|t|2"
+        number elo "ELO rival"
+        number acc "Precisión %"
+        number rating "Rating estimado"
+        json sk "SkillRatings {ap,ta,es,fi,ti}"
+        json lb "LabelCounts {Genial..Fallo}"
+        json pc "PiecePerf {piece:{c,s}}"
+        string on "Nombre apertura"
+        string op "Primeras 3 jugadas"
+        number opAcc "Precisión apertura"
+    }
+    
+    AJ_CFG {
+        string key PK "aj_cfg"
+        json value "Config object"
+    }
+    
+    AJ_DEF {
+        string key PK "aj_def"
+        json value "Config defaults"
+    }
+    
+    AJ_PERF {
+        string key PK "aj_perf"
+        json value "Array<{n:string, c:Config}>"
+    }
+    
+    SAVED_CONFIG {
+        string n "Nombre"
+        json c "Config completo"
+    }
+    
+    OPENING_BOOK {
+        string key "OB (const)"
+        string value "ECO|Nombre|Movimientos SAN"
+    }

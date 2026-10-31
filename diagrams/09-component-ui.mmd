@@ -1,0 +1,111 @@
+%% Chess Trainer - Class Diagram (Component View)
+%% UI Components
+
+classDiagram
+    %% UI Components (as conceptual classes)
+    class TabJugar {
+        +select#mode
+        +button#nw
+        +button#fp
+        +input#elo
+        +select#col
+        +inputs#tw#tb#inc
+        +div#wrap (tablero)
+        +div#cap captured
+        +div#bar advantage
+        +div#pts score
+        +div#op opening
+        +nav#nv buttons
+        +div#ex explanation
+        +div#res result
+        +buttons#rb#rs#hi#ud#th
+        +div#lst move list
+    }
+    
+    class TabPostpartida {
+        +div#hd header
+        +div#gc graph container
+        +svg#gr evaluation graph
+        +div#gtip tooltip
+        +div#phs phase bars
+        +div#pcs piece performance
+        +table#stt stats table
+        +div#km key moments
+    }
+    
+    class TabPerfil {
+        +div#tF profile container
+        +radar skills
+        +sparkline rating history
+        +piece performance table
+        +openings table
+        +total moves tags
+        +common errors
+        +button#clr
+    }
+    
+    class TabLord {
+        +select#lsel move selector
+        +div#lm chat log
+        +div#lch quick questions
+        +textarea#li input
+        +button#ls send
+        +div#hfc future chips
+        +div#hb hologram board
+        +nav#hct hologram controls
+        +div#hl future description
+    }
+    
+    class SettingsModal {
+        +details#board colors/coords
+        +details#pieces colors/outlines/size
+        +details#interface theme/font/compact
+        +details#buttons style/color/size/shadow
+        +details#game sound/vib/hold/flip/defaults
+        +details#sprites piece images upload
+        +details#presets save/load/export/import
+        +details#data reset/factory
+    }
+    
+    class BoardRenderer {
+        +render()
+        +click(sq)
+        +pieceEl(c,t)
+        +drag handlers
+        +threats display
+        +last move highlight
+        +ghost move preview
+        +hologram overlay
+    }
+    
+    class GraphRenderer {
+        +graph() SVG polyline + dots
+        +spark() SVG mini chart
+        +radar() SVG polygon
+    }
+    
+    class ClockManager {
+        +clk() update displays
+        +setInterval 200ms tick
+        +time loss detection
+        +increment on move
+    }
+    
+    class OpeningDetector {
+        +opInfo() scan history
+        +opName() current opening
+        +opTxt() formatted card
+        +BK Set book keys
+        +OBN map metadata
+    }
+    
+    %% Relationships
+    TabJugar --> BoardRenderer : usa
+    TabJugar --> ClockManager : usa
+    TabJugar --> OpeningDetector : usa
+    TabPostpartida --> GraphRenderer : usa
+    TabPerfil --> GraphRenderer : usa
+    TabLord --> BoardRenderer : holograma
+    SettingsModal --> BoardRenderer : ap() aplica CSS vars
+    BoardRenderer --> ChessGame : read state
+    GraphRenderer --> ChessGame : read evH + log

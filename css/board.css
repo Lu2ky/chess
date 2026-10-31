@@ -1,0 +1,125 @@
+/* ============================================================
+   board.css — tablero, casillas, piezas y holograma
+   ============================================================ */
+
+#bd {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+  aspect-ratio: 1;
+  width: 100%;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
+}
+
+.sq {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc((min(100vw - 24px, 456px) - 18px) / 8 * .78);
+  line-height: 1;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+  cursor: pointer;
+  position: relative;
+}
+
+.sq.l { background: var(--l); }
+.sq.d { background: var(--d); }
+
+.sq.sel {
+  outline: 3px solid var(--ac, #2e7d32);
+  outline-offset: -3px;
+}
+
+.sq.last {
+  box-shadow: inset 0 0 0 100px var(--hl, #ffeb3b66);
+}
+
+.sq.mv::after {
+  content: "";
+  width: 28%;
+  height: 28%;
+  border-radius: 50%;
+  background: var(--ad, #2e7d3299);
+  position: absolute;
+}
+
+.w {
+  color: var(--wc, #fff);
+  text-shadow: 0 0 2px var(--wo, #000), 0 0 2px var(--wo, #000);
+}
+
+.b {
+  color: var(--bc, #111);
+  text-shadow: 0 0 2px var(--bo, transparent);
+}
+
+#bd .sq > span,
+#bd .sq > img {
+  transform: scale(var(--ps, 1));
+}
+
+.pi {
+  width: 86%;
+  height: 86%;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+/* ---------- pista / fantasma ---------- */
+.sq.gf {
+  outline: 2px dashed #00e5ff;
+  outline-offset: -2px;
+}
+
+.gh {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #00e5ff;
+  opacity: .6;
+  text-shadow: 0 0 6px #0277bd;
+  pointer-events: none;
+}
+
+/* ---------- amenazas ---------- */
+.sq.thr {
+  box-shadow: inset 0 0 0 3px #e53935;
+}
+
+.sq.hn {
+  outline: 3px solid #ffb300;
+  outline-offset: -3px;
+}
+
+#th.on {
+  background: #e53935;
+  color: #fff;
+}
+
+/* ---------- tablero holográfico ---------- */
+#hb {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+  aspect-ratio: 1;
+  width: 100%;
+  max-width: 320px;
+  margin: 8px auto;
+}
+
+#hb .sq {
+  font-size: calc(min(100vw - 24px, 320px) / 8 * .78);
+  cursor: default;
+}
+
+#hct button {
+  flex: 1;
+}

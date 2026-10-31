@@ -1,0 +1,59 @@
+%% Chess Trainer - State Diagram
+%% Game States (Simplified)
+
+stateDiagram-v2
+    [*] --> Inicializando : nuevo()
+    Inicializando --> EsperandoUsuario : Modo 2J o user=turno
+    Inicializando --> TurnoMotor : Modo practica/reloj
+    
+    state EsperandoUsuario {
+        [*] --> SeleccionandoPieza : click pieza propia
+        SeleccionandoPieza --> SeleccionandoDestino : click/arrastre
+        SeleccionandoDestino --> JugadaLegal : drop en mv[]
+        SeleccionandoDestino --> SeleccionandoPieza : click otra pieza
+        SeleccionandoDestino --> EsperandoUsuario : click vacio/ilegal
+        JugadaLegal --> Analizando : play(mv)
+    }
+    
+    state TurnoMotor {
+        [*] --> Calculando : reply()
+        Calculando --> Ejecutando : engineMove()
+        Ejecutando --> ActualizandoUI : render()
+        ActualizandoUI --> VerificandoFin
+    }
+    
+    Analizando --> VerificandoFin : classification + log push
+    
+    state VerificandoFin {
+        [*] --> JaqueMate : in_checkmate()
+        [*] --> Tablas : game_over() && !mate
+        [*] --> Continuar : !game_over()
+        JaqueMate --> Finalizado : finish(winner)
+        Tablas --> Finalizado : finish(null)
+        Continuar --> EsperandoUsuario : user=turno
+        Continuar --> TurnoMotor : motor=turno
+    }
+    
+    Finalizado --> PostPartida : save() + stats
+    PostPartida --> [*] : Usuario navega tabs
+    
+    %% Clock timeout
+    EsperandoUsuario --> TiempoAgotado : clock tick t<=0
+    TurnoMotor --> TiempoAgotado : clock tick t<=0
+    TiempoAgotado --> Finalizado : finish(opp)
+    
+    %% Undo (solo practica)
+    EsperandoUsuario --> Deshaciendo : ud() + modo=p
+    Deshaciendo --> EsperandoUsuario : undo 2 plies + pop log
+    
+    %% Navigation (vp != null)
+    EsperandoUsuario --> ViendoHistorial : nav(b/f/s/e)
+    ViendoHistorial --> EsperandoUsuario : nav(e)
+    TurnoMotor --> ViendoHistorial : nav(b/f/s/e)
+    ViendoHistorial --> TurnoMotor : nav(e)
+    
+    %% Lord analysis
+    EsperandoUsuario --> AnalisisLord : click Lord / tab L
+    AnalisisLord --> EsperandoUsuario : cerrar
+    TurnoMotor --> AnalisisLord : tab L
+    AnalisisLord --> TurnoMotor : volver a J
