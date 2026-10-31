@@ -358,6 +358,7 @@ textarea {
 /* ------------------------------ tabs ------------------------------ */
 
 .tabs {
+  position: relative;
   display: flex;
   gap: 4px;
   padding: 4px;
@@ -368,7 +369,34 @@ textarea {
   border-radius: var(--r-pill);
 }
 
+/* Pill que se desliza hasta la pestaña activa. */
+.tab-ind {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  width: 0;
+  border-radius: var(--r-pill);
+  background: var(--ac);
+  box-shadow: var(--sh-1);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tabs.ready .tab-ind {
+  opacity: 1;
+  transition:
+    transform var(--dur-slow) var(--ease),
+    width var(--dur-slow) var(--ease);
+}
+
+.tabs:has(button.on:hover) .tab-ind {
+  filter: brightness(1.06);
+}
+
 .tabs button {
+  position: relative;
+  z-index: 1;
   flex: 1;
   min-height: 34px;
   padding: 6px 10px;
@@ -379,16 +407,24 @@ textarea {
   font-size: .95em;
   font-weight: 600;
   color: var(--fg);
+  transition: color var(--dur-slow) var(--ease);
 }
 
+/* Antes de que JS coloque el indicador, la pestaña activa mantiene su fondo
+   para evitar un parpadeo sin selección visible. */
 .tabs button.on {
   background: var(--ac);
   color: #fff;
   box-shadow: var(--sh-1);
 }
 
-.tabs button.on:hover {
-  filter: brightness(1.04);
+.tabs.ready button.on {
+  background: transparent;
+  box-shadow: none;
+}
+
+.tabs.ready button.on:hover {
+  filter: none;
 }
 
 /* --------------------------- capturas ----------------------------- */

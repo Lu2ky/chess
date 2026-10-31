@@ -11,7 +11,65 @@ export class TabsView {
     this.fullscreenButton = fullscreenButton;
     this.current = null;
     this.onChange = null;
+    this.indicator = root.querySelector('.tab-ind');
+    this.observer = null;
     this.bind();
+    this.initIndicator();
+  }
+
+  /**
+   * Coloca el pill en la pestaña activa y lo mantiene sincronizado cuando
+   * cambia el tamaño de la barra (resize, cambio de fuente, fullscreen).
+   */
+  initIndicator() {
+    if (!this.indicator) return;
+
+    const place = () => this.syncIndicator({ instant: true });
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(() => requestAnimationFrame(place));
+    } else {
+      place();
+    }
+
+    if (typeof ResizeObserver === 'function') {
+      this.observer = new ResizeObserver(() => this.syncIndicator());
+      this.observer.observe(this.root);
+      for (const button of this.root.querySelectorAll('button[data-t]')) {
+        this.observer.observe(button);
+      }
+    }
+
+    window.addEventListener('resize', () => this.syncIndicator());
+  }
+
+  syncIndicator({ instant = false } = {}) {
+    const indicator = this.indicator;
+    if (!indicator) return;
+
+    const active = this.root.querySelector('button[data-t].on');
+    if (!active) return;
+
+    // Rectángulos en coordenadas del contenedor (compensando borde y scroll).
+    const rootRect = this.root.getBoundingClientRect();
+    const activeRect = active.getBoundingClientRect();
+    const x =
+      activeRect.left -
+      rootRect.left -
+      this.root.clientLeft +
+      this.root.scrollLeft;
+    const width = activeRect.width;
+
+    if (instant) {
+      this.root.classList.remove('ready');
+      indicator.style.width = `${width}px`;
+      indicator.style.transform = `translateX(${x}px)`;
+      void indicator.offsetWidth;
+      this.root.classList.add('ready');
+      return;
+    }
+
+    indicator.style.width = `${width}px`;
+    indicator.style.transform = `translateX(${x}px)`;
   }
 
   bind() {
@@ -60,6 +118,8 @@ export class TabsView {
       button.setAttribute('aria-selected', String(on));
       button.tabIndex = on ? 0 : -1;
     }
+
+    this.syncIndicator();
 
     if (this.fullscreenButton) {
       this.fullscreenButton.style.display = key === 'J' ? '' : 'none';
