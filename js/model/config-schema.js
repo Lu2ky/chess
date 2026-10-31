@@ -12,6 +12,7 @@ export const DEFAULT_CONFIG = Object.freeze({
   ac: '#2e7d32',
   co: true,
   mvd: true,
+  mov: true,
   wc: '#ffffff',
   bc: '#111111',
   wo: '#000000',
@@ -95,6 +96,7 @@ export const SETTINGS_SECTIONS = Object.freeze([
     ['t', 'cap', 'Piezas capturadas'],
     ['t', 'lst', 'Lista de jugadas'],
     ['t', 'opn', 'Tarjeta de apertura'],
+    ['t', 'mov', 'Animar piezas al mover'],
   ]],
   ['Botones', [
     ['s', 'bst', 'Estilo', [['soft', 'Suave'], ['solid', 'Sólido'], ['outline', 'Contorno'], ['glass', 'Cristal'], ['3d', 'Relieve 3D']]],

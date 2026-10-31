@@ -50,6 +50,12 @@ export class SettingsView {
     this.root.addEventListener('input', event => this.handleInput(event));
     this.root.addEventListener('change', event => this.handleInput(event));
     this.root.addEventListener('click', event => this.handleClick(event));
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && this.root.classList.contains('open')) {
+        this.emit('action', 'close');
+      }
+    });
   }
 
   /* ------------------------------------------------------------------ */
@@ -181,6 +187,7 @@ export class SettingsView {
       '<small id="spm"></small></details>';
 
     this.root.style.display = 'block';
+    this.root.classList.add('open');
     this.setStatus(status);
   }
 
@@ -189,6 +196,7 @@ export class SettingsView {
   }
 
   close() {
+    this.root.classList.remove('open');
     this.root.style.display = 'none';
   }
 
@@ -258,6 +266,7 @@ export class SettingsView {
       ['no', !config.opn],
       ['nco', !config.co],
       ['nm', !config.mvd],
+      ['npm', !config.mov],
       ['cp', config.cp],
     ].forEach(([name, value]) => root.classList.toggle(name, Boolean(value)));
   }

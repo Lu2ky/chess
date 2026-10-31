@@ -222,14 +222,15 @@ export class GameView {
       return;
     }
 
-    element.innerHTML = moves.map(move => {
+    element.innerHTML = moves.map((move, index) => {
       const tag = ` <span class="tag ${escape(move.label)}">${escape(move.label)}</span>`;
       const best = move.best
         ? ` <small>mejor: ${escape(move.best)}${move.cause ? ` · ${escape(move.cause)}` : ''}</small>`
         : '';
       const buttons = move.hasBest ? this.buttons(move.index, move.ghostVisible) : '';
+      const entering = index === moves.length - 1 ? ' class="move-entry"' : '';
 
-      return `<div>${escape(move.number)} ${escape(move.san)}${tag}${best}${buttons}</div>`;
+      return `<div${entering}>${escape(move.number)} ${escape(move.san)}${tag}${best}${buttons}</div>`;
     }).join('');
 
     element.scrollTop = 1e5;

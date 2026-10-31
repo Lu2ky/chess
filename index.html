@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
 <title>Entrenador de ajedrez</title>
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/board.css">
@@ -12,86 +13,88 @@
 </head>
 <body>
 <main>
-  <div class="tabs" id="tabs">
-    <button data-t="J" class="on">Jugar</button>
-    <button data-t="P">Post-partida</button>
-    <button data-t="F">Perfil</button>
-    <button data-t="L">Lord</button>
+  <div class="tabs" id="tabs" role="tablist" aria-label="Secciones">
+    <button data-t="J" class="on" role="tab" aria-selected="true" aria-controls="tJ" tabindex="0">Jugar</button>
+    <button data-t="P" role="tab" aria-selected="false" aria-controls="tP" tabindex="-1">Post-partida</button>
+    <button data-t="F" role="tab" aria-selected="false" aria-controls="tF" tabindex="-1">Perfil</button>
+    <button data-t="L" role="tab" aria-selected="false" aria-controls="tL" tabindex="-1">Lord</button>
   </div>
 
   <!-- ==================== TAB: JUGAR ==================== -->
-  <section id="tJ">
-    <!-- Columna de controles (derecha en desktop) -->
-    <div class="controls-column" id="controlsColumn">
-      <div class="row" id="gameControls">
-        <select id="mode">
-          <option value="p">Práctica</option>
-          <option value="t">Reloj vs motor</option>
-          <option value="2">2 jugadores</option>
-        </select>
-        <button id="nw">Nueva partida</button>
-        <button id="fp">Girar</button>
+  <section id="tJ" role="tabpanel" aria-label="Jugar">
+    <!-- Columna izquierda: tablero + capturas/reloj -->
+    <div class="board-column">
+      <div id="wrap">
+        <div id="rk"></div>
+        <div id="bd" role="group" aria-label="Tablero de ajedrez"></div>
+        <div id="fl"></div>
+        <button id="lk" title="Fijar pantalla" aria-label="Fijar pantalla">🔓</button>
       </div>
 
-      <div class="row" id="rE">
-        <label>ELO: <b id="ev">1200</b></label>
-        <input id="elo" type="range" min="200" max="3000" step="50" value="1200">
-        <select id="col">
-          <option value="w">Blancas</option>
-          <option value="b">Negras</option>
-        </select>
-      </div>
-
-      <div class="row" id="rT">
-        <label>Blancas <input id="tw" type="number" min="1" max="180" value="5"> min</label>
-        <label>Negras <input id="tb" type="number" min="1" max="180" value="5"> min</label>
-        <label>+<input id="inc" type="number" min="0" max="60" value="0">s</label>
-      </div>
+      <div class="cap"><span id="tc"></span><b id="tk" class="clk"></b></div>
+      <div class="cap"><span id="bc"></span><b id="bk" class="clk"></b></div>
     </div>
 
-    <!-- Tablero (izquierda en desktop) -->
-    <div id="wrap">
-      <div id="rk"></div>
-      <div id="bd"></div>
-      <div id="fl"></div>
-      <button id="lk" title="Fijar pantalla">🔓</button>
-    </div>
+    <!-- Columna derecha: controles + panel lateral -->
+    <div class="panel-column">
+      <div class="controls-column" id="controlsColumn">
+        <div class="row" id="gameControls">
+          <select id="mode" aria-label="Modo de juego">
+            <option value="p">Práctica</option>
+            <option value="t">Reloj vs motor</option>
+            <option value="2">2 jugadores</option>
+          </select>
+          <button id="nw">Nueva partida</button>
+          <button id="fp">Girar</button>
+        </div>
 
-    <!-- Capturas y reloj -->
-    <div class="cap"><span id="tc"></span><b id="tk" class="clk"></b></div>
-    <div class="cap"><span id="bc"></span><b id="bk" class="clk"></b></div>
+        <div class="row" id="rE">
+          <label>ELO: <b id="ev">1200</b></label>
+          <input id="elo" type="range" min="200" max="3000" step="50" value="1200" aria-label="Nivel ELO del motor">
+          <select id="col" aria-label="Color de las piezas">
+            <option value="w">Blancas</option>
+            <option value="b">Negras</option>
+          </select>
+        </div>
 
-    <!-- Columna lateral (derecha en desktop) -->
-    <div class="side-column" id="sideColumn">
-      <div id="bar"><i></i></div>
-      <div id="pts"></div>
-      <div class="card" id="op" style="display:none"></div>
-
-      <div class="row" id="nv">
-        <button data-n="s">⏮</button>
-        <button data-n="b">◀</button>
-        <button data-n="f">▶</button>
-        <button data-n="e">⏭</button>
-        <span id="pl"></span>
+        <div class="row" id="rT">
+          <label>Blancas <input id="tw" type="number" min="1" max="180" value="5" aria-label="Minutos de las blancas"> min</label>
+          <label>Negras <input id="tb" type="number" min="1" max="180" value="5" aria-label="Minutos de las negras"> min</label>
+          <label>+<input id="inc" type="number" min="0" max="60" value="0" aria-label="Incremento en segundos">s</label>
+        </div>
       </div>
 
-      <div class="card" id="ex" style="display:none"></div>
-      <div id="res">Tu turno</div>
+      <div class="side-column" id="sideColumn">
+        <div id="bar" role="progressbar" aria-label="Ventaja de blancas"><i></i></div>
+        <div id="pts"></div>
+        <div class="card" id="op" style="display:none"></div>
 
-      <div class="row" id="actions">
-        <button id="rb" style="display:none">Ver informe</button>
-        <button id="rs">Rendirse</button>
-        <button id="hi">Pista</button>
-        <button id="ud">Deshacer</button>
-        <button id="th">Amenazas</button>
+        <div class="row nav-row" id="nv">
+          <button data-n="s" aria-label="Ir al inicio" title="Inicio">⏮</button>
+          <button data-n="b" aria-label="Jugada anterior" title="Anterior">◀</button>
+          <button data-n="f" aria-label="Jugada siguiente" title="Siguiente">▶</button>
+          <button data-n="e" aria-label="Ir al final" title="Final">⏭</button>
+          <span id="pl"></span>
+        </div>
+
+        <div class="card" id="ex" style="display:none"></div>
+        <div id="res" role="status" aria-live="polite">Tu turno</div>
+
+        <div class="row actions-row" id="actions">
+          <button id="rb" style="display:none">Ver informe</button>
+          <button id="rs">Rendirse</button>
+          <button id="hi">Pista</button>
+          <button id="ud">Deshacer</button>
+          <button id="th">Amenazas</button>
+        </div>
+
+        <div class="card" id="lst" aria-label="Lista de jugadas"></div>
       </div>
-
-      <div class="card" id="lst"></div>
     </div>
   </section>
 
   <!-- ==================== TAB: POST-PARTIDA ==================== -->
-  <section id="tP" style="display:none">
+  <section id="tP" role="tabpanel" style="display:none" aria-label="Post-partida">
     <div class="card" id="hd"></div>
     <div class="card" id="gc" style="position:relative">
       <b>Evolución de la partida</b>
@@ -106,41 +109,45 @@
   </section>
 
   <!-- ==================== TAB: PERFIL ==================== -->
-  <section id="tF" style="display:none"></section>
+  <section id="tF" role="tabpanel" style="display:none" aria-label="Perfil"></section>
 
   <!-- ==================== TAB: LORD ==================== -->
-  <section id="tL" style="display:none">
+  <section id="tL" role="tabpanel" style="display:none" aria-label="Lord">
     <div class="card">
       <b>Lord</b> · entrenador con chat<br>
-      <select id="lsel" style="width:100%;margin-top:6px"></select>
+      <select id="lsel" style="width:100%;margin-top:6px" aria-label="Jugada a analizar"></select>
     </div>
-    <div id="lm"></div>
-    <div id="lch"></div>
-    <div class="row">
-      <textarea id="li" rows="2" placeholder="Pregunta a Lord sobre esta jugada…"></textarea>
-      <button id="ls">Enviar</button>
+
+    <div class="lord-chat">
+      <div id="lm" aria-live="polite"></div>
+      <div id="lch"></div>
+      <div class="row">
+        <textarea id="li" rows="2" placeholder="Pregunta a Lord sobre esta jugada…" aria-label="Mensaje para Lord"></textarea>
+        <button id="ls">Enviar</button>
+      </div>
     </div>
-    <div class="card">
+
+    <div class="card lord-futures">
       <b>Futuros alternativos</b>
       <small>(holograma: rojo peligro · cian mejor · violeta alternativa · verde oportunidad)</small>
       <div id="hfc" class="row" style="margin-top:6px"></div>
-      <div id="hb"></div>
-      <div class="row" id="hct">
-        <button data-h="s">⏮</button>
-        <button data-h="b">◀</button>
-        <button data-h="f">▶</button>
-        <button data-h="p" id="hp">⏵</button>
+      <div id="hb" role="group" aria-label="Tablero holográfico de futuros"></div>
+      <div class="row nav-row" id="hct">
+        <button data-h="s" aria-label="Inicio del futuro" title="Inicio">⏮</button>
+        <button data-h="b" aria-label="Paso anterior" title="Anterior">◀</button>
+        <button data-h="f" aria-label="Paso siguiente" title="Siguiente">▶</button>
+        <button data-h="p" id="hp" aria-label="Reproducir futuro" title="Reproducir">⏵</button>
       </div>
       <div id="hl" style="font-size:14px"></div>
     </div>
   </section>
 
-  <button id="gear" title="Ajustes">⚙</button>
-  <button id="fs" title="Pantalla completa">⛶</button>
+  <button id="gear" title="Ajustes" aria-label="Abrir ajustes">⚙</button>
+  <button id="fs" title="Pantalla completa" aria-label="Pantalla completa">⛶</button>
 </main>
 
 <!-- Contenedor del modal de ajustes (lo puebla SettingsView) -->
-<div id="sp"></div>
+<div id="sp" role="dialog" aria-modal="true" aria-label="Ajustes"></div>
 
 <div id="boot-error" style="display:none;padding:24px;font:16px system-ui,sans-serif">
   <b>No se pudo iniciar la aplicación.</b>
