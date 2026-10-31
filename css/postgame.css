@@ -1,22 +1,258 @@
 /* ============================================================
-   postgame.css — gráfica de evolución, tooltip y perfiles
+   postgame.css — informe post-partida: gráfica, fases, piezas,
+   tabla, momentos clave
+   Animaciones de panel (siempre on) + stagger
    ============================================================ */
 
+/* Contenedor de la gráfica */
 #gr {
   touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
+  width: 100%;
+  height: 200px;
+  position: relative;
+  margin: var(--sp-3) 0;
 }
 
+/* Tooltip de la gráfica */
 #gtip {
   position: absolute;
   z-index: 5;
-  background: #000d;
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: 8px;
-  font-size: 13px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-md);
+  font-family: var(--font-ui);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
   pointer-events: none;
   white-space: nowrap;
+  box-shadow: var(--sh-lg);
+  border: 1px solid var(--line);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+  pointer-events: none;
 }
+
+#gtip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Tarjetas del postgame */
+#tP .card {
+  animation: card-in var(--dur-panel) var(--ease-out) both;
+}
+
+#tP .card:nth-child(1) { animation-delay: 0ms; }
+#tP .card:nth-child(2) { animation-delay: 60ms; }
+#tP .card:nth-child(3) { animation-delay: 120ms; }
+#tP .card:nth-child(4) { animation-delay: 180ms; }
+#tP .card:nth-child(5) { animation-delay: 240ms; }
+
+/* Header del informe */
+#hd {
+  text-align: center;
+  padding: var(--sp-4) var(--sp-3);
+  background: linear-gradient(180deg, var(--accent-soft) 0%, var(--paper-elev) 100%);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+#hd::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--green), var(--accent), var(--red));
+}
+
+#hd b { display: block; font-size: var(--fs-xl); font-weight: var(--fw-semibold); color: var(--ink); margin-bottom: var(--sp-1); }
+#hd span { display: block; font-size: var(--fs-sm); color: var(--ink-muted); }
+
+/* Fases */
+#phs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-2);
+  text-align: center;
+}
+
+.phase {
+  padding: var(--sp-3);
+  background: var(--paper-sunken);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  transition: border-color var(--dur-fast), transform var(--dur-fast);
+}
+
+.phase:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--sh-md); }
+
+.phase-name {
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-faint);
+  margin-bottom: var(--sp-1);
+}
+
+.phase-value {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-light);
+  color: var(--ink);
+}
+
+.phase-value .tag { margin-left: var(--sp-1); vertical-align: middle; }
+
+/* Rendimiento por pieza */
+#pcs .piece-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+#pcs .piece-row:last-child { border-bottom: none; }
+
+.piece-info {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 70px;
+}
+
+.piece-glyph {
+  font-size: var(--fs-xl);
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+}
+
+.piece-name { font-family: var(--font-ui); font-size: var(--fs-sm); color: var(--ink-muted); text-transform: capitalize; }
+.piece-count { font-family: var(--font-ui); font-size: var(--fs-2xs); color: var(--ink-faint); }
+
+.piece-bar { flex: 1; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.piece-bar i { display: block; height: 100%; background: var(--accent); border-radius: 3px; transform-origin: left center; transform: scaleX(0); animation: bar-grow var(--dur-slow) var(--ease-spring) forwards; }
+
+@keyframes bar-grow { to { transform: scaleX(1); } }
+
+.piece-acc {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-light);
+  color: var(--ink);
+  min-width: 4.5em;
+  text-align: right;
+}
+
+/* Tabla de etiquetas */
+#stt { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+
+#stt th {
+  font-family: var(--font-ui);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-faint);
+  padding: var(--sp-2) var(--sp-1);
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+}
+
+#stt td {
+  padding: var(--sp-2) var(--sp-1);
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-ui);
+}
+
+#stt td:first-child {
+  text-align: left;
+  font-weight: var(--fw-medium);
+  color: var(--ink);
+}
+
+#stt tr:last-child td { border-bottom: none; }
+
+#stt .tag { font-size: var(--fs-2xs); }
+
+/* Filas de precisión */
+#stt tr.total td {
+  font-weight: var(--fw-bold);
+  color: var(--ink);
+  background: var(--accent-soft);
+  border-top: 2px solid var(--accent);
+}
+
+/* Momentos clave */
+#km { margin-top: var(--sp-2); }
+
+.key-moment {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--paper-sunken);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  margin-bottom: var(--sp-2);
+  animation: card-in var(--dur-panel) var(--ease-out) both;
+}
+
+.key-moment:last-child { margin-bottom: 0; }
+
+.km-num {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-light);
+  color: var(--ink-faint);
+  min-width: 3em;
+  text-align: right;
+}
+
+.km-move {
+  font-family: var(--font-ui);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
+  min-width: 3em;
+}
+
+.km-tag { flex-shrink: 0; }
+
+.km-loss {
+  font-family: var(--font-display);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+  color: var(--red);
+  flex: 1;
+  text-align: right;
+}
+
+.km-cause {
+  font-family: var(--font-ui);
+  font-size: var(--fs-xs);
+  color: var(--ink-muted);
+  font-style: italic;
+  margin-top: 2px;
+}
+
+/* ============================================================
+   Animaciones de entrada escalonadas para postgame
+   ============================================================ */
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Reducir motion ya manejado en design-tokens.css */

@@ -1,0 +1,539 @@
+/* ============================================================
+   design-tokens.css — Sistema de diseño: Clásica atemporal
+   Una familia tipográfica (serif humanista), jerarquía por peso/escala,
+   paleta monocromática con acento ámbar/dorado sutil.
+   ============================================================ */
+
+:root {
+  /* ---------- Color: monocromático cálido + acento ámbar ---------- */
+  --ink: #1a1612;           /* negro suavizado, casi tinta */
+  --ink-muted: #4a433d;     /* texto secundario */
+  --ink-faint: #8a827a;     /* labels, divisores */
+  --paper: #faf8f5;         /* fondo principal, tono papel envejecido */
+  --paper-elev: #f3efe9;    /* cards elevadas */
+  --paper-sunken: #ebe6df;  /* áreas hundidas (input, board margin) */
+  --line: #e0dad3;          /* bordes, divisores */
+  --accent: #c8a84c;        /* ámbar/dorado — el único color "real" */
+  --accent-soft: #e8dcc8;   /* acento al 20% */
+  --accent-strong: #a88a38; /* hover/active */
+  --red: #b83a2a;           /* solo para Fallo/Error — semántico */
+  --green: #4a7c3a;         /* solo para Genial/Excelente — semántico */
+
+  /* Dark mode: mismo espíritu, invertido con elegancia */
+  --ink-d: #f5f0e8;
+  --ink-muted-d: #c8bfb5;
+  --ink-faint-d: #8a827a;
+  --paper-d: #1c1814;
+  --paper-elev-d: #24201b;
+  --paper-sunken-d: #181512;
+  --line-d: #3a342e;
+  --accent-d: #d4b85c;
+  --accent-soft-d: #3a3228;
+  --accent-strong-d: #e8cc6c;
+  --red-d: #d86a5a;
+  --green-d: #7ac46a;
+
+  /* ---------- Tipografía: una familia humanista serif ---------- */
+  /* Usamos Crimson Pro (Google Fonts) — humanista, legible, con italics hermosas */
+  --font-display: 'Crimson Pro', Georgia, Cambria, serif;
+  --font-ui: 'Crimson Pro', Georgia, Cambria, serif;  /* misma familia */
+
+  /* Escala tipográfica — modular, armónica */
+  --fs-2xs: 0.625rem;   /* 10px - labels minúsculos */
+  --fs-xs: 0.75rem;     /* 12px - coords, clocks pequeños */
+  --fs-sm: 0.8125rem;   /* 13px - UI densa */
+  --fs-base: 0.9375rem; /* 15px - cuerpo */
+  --fs-lg: 1.125rem;    /* 18px - énfasis */
+  --fs-xl: 1.375rem;    /* 22px - headings pequeños */
+  --fs-2xl: 1.75rem;    /* 28px - headings medios */
+  --fs-3xl: 2.25rem;    /* 36px - hero/numero grande */
+  --fs-4xl: 3rem;       /* 48px - display */
+
+  /* Pesos — Crimson Pro tiene 300, 400, 600, 700 */
+  --fw-light: 300;
+  --fw-regular: 400;
+  --fw-medium: 500;     /* simulado via 600 */
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* Interlineado */
+  --lh-tight: 1.15;
+  --lh-normal: 1.5;
+  --lh-relaxed: 1.7;
+
+  /* Espaciado — escala de 4px base */
+  --sp-0: 0;
+  --sp-1: 0.25rem;   /* 4px */
+  --sp-2: 0.5rem;    /* 8px */
+  --sp-3: 0.75rem;   /* 12px */
+  --sp-4: 1rem;      /* 16px */
+  --sp-5: 1.5rem;    /* 24px */
+  --sp-6: 2rem;      /* 32px */
+  --sp-8: 3rem;      /* 48px */
+  --sp-10: 4rem;     /* 64px */
+
+  /* Radios — discretos, no "redondeado por defecto" */
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+  --r-full: 9999px;
+
+  /* Sombras — muy sutiles, solo para elevación real */
+  --sh-sm: 0 1px 2px rgba(26,22,18,0.06);
+  --sh-md: 0 4px 12px rgba(26,22,18,0.08);
+  --sh-lg: 0 8px 24px rgba(26,22,18,0.1);
+  --sh-inner: inset 0 2px 4px rgba(26,22,18,0.06);
+
+  /* Transiciones — rápidas, con easing propio */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-fast: 120ms;
+  --dur-normal: 200ms;
+  --dur-slow: 350ms;
+  --dur-panel: 300ms;
+
+  /* Tablero — colores de casillas inspirados en madera/ebano */
+  --sq-light: #f0d9b5;   /* arce/crema */
+  --sq-dark: #b58863;    /* nogal medio */
+  --sq-light-d: #d4b896;
+  --sq-dark-d: #8b6d4a;
+
+  /* Selección/resaltado — usando acento */
+  --sel: var(--accent);
+  --sel-d: var(--accent-d);
+  --hl: #ffeb3b66;       /* última jugada - amarillo clásico */
+  --ad: #2e7d3299;       /* movidas legales - verde clásico */
+
+  /* Focus visible — accesible, elegante */
+  --focus-ring: 0 0 0 2px var(--paper), 0 0 0 4px var(--accent);
+  --focus-ring-d: 0 0 0 2px var(--paper-d), 0 0 0 4px var(--accent-d);
+
+  /* Z-index scale */
+  --z-base: 1;
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-modal: 100;
+  --z-toast: 200;
+  --z-tooltip: 300;
+}
+
+/* ============================================================
+   Dark mode — automático + forzado via data-theme
+   ============================================================ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: var(--ink-d);
+    --ink-muted: var(--ink-muted-d);
+    --ink-faint: var(--ink-faint-d);
+    --paper: var(--paper-d);
+    --paper-elev: var(--paper-elev-d);
+    --paper-sunken: var(--paper-sunken-d);
+    --line: var(--line-d);
+    --accent: var(--accent-d);
+    --accent-soft: var(--accent-soft-d);
+    --accent-strong: var(--accent-strong-d);
+    --red: var(--red-d);
+    --green: var(--green-d);
+    --sel: var(--sel-d);
+    --sq-light: var(--sq-light-d);
+    --sq-dark: var(--sq-dark-d);
+    --focus-ring: var(--focus-ring-d);
+  }
+}
+
+:root[data-theme="dark"] {
+  --ink: var(--ink-d);
+  --ink-muted: var(--ink-muted-d);
+  --ink-faint: var(--ink-faint-d);
+  --paper: var(--paper-d);
+  --paper-elev: var(--paper-elev-d);
+  --paper-sunken: var(--paper-sunken-d);
+  --line: var(--line-d);
+  --accent: var(--accent-d);
+  --accent-soft: var(--accent-soft-d);
+  --accent-strong: var(--accent-strong-d);
+  --red: var(--red-d);
+  --green: var(--green-d);
+  --sel: var(--sel-d);
+  --sq-light: var(--sq-light-d);
+  --sq-dark: var(--sq-dark-d);
+  --focus-ring: var(--focus-ring-d);
+}
+
+:root[data-theme="light"] {
+  --ink: #1a1612;
+  --ink-muted: #4a433d;
+  --ink-faint: #8a827a;
+  --paper: #faf8f5;
+  --paper-elev: #f3efe9;
+  --paper-sunken: #ebe6df;
+  --line: #e0dad3;
+  --accent: #c8a84c;
+  --accent-soft: #e8dcc8;
+  --accent-strong: #a88a38;
+  --red: #b83a2a;
+  --green: #4a7c3a;
+  --sel: #c8a84c;
+  --sq-light: #f0d9b5;
+  --sq-dark: #b58863;
+  --focus-ring: 0 0 0 2px #faf8f5, 0 0 0 4px #c8a84c;
+}
+
+/* ============================================================
+   Reduced motion — respetar preferencia del usuario
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0.01ms;
+    --dur-normal: 0.01ms;
+    --dur-slow: 0.01ms;
+    --dur-panel: 0.01ms;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================
+   Tipografía base — una familia, escala armónica
+   ============================================================ */
+html {
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: var(--lh-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: var(--fs-base);
+  line-height: var(--lh-normal);
+  font-weight: var(--fw-regular);
+}
+
+/* Headings — misma familia, peso/escala */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-tight);
+  color: var(--ink);
+  margin: 0 0 var(--sp-3);
+}
+
+h1 { font-size: var(--fs-4xl); }
+h2 { font-size: var(--fs-3xl); }
+h3 { font-size: var(--fs-2xl); }
+h4 { font-size: var(--fs-xl); }
+h5 { font-size: var(--fs-lg); }
+h6 { font-size: var(--fs-base); }
+
+/* Texto pequeño / labels */
+small, .small { font-size: var(--fs-xs); line-height: var(--lh-normal); }
+
+/* Links — subrayado elegante */
+a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color var(--dur-fast) var(--ease-out); }
+a:hover { border-color: var(--accent); }
+a:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 2px; }
+
+/* Selection */
+::selection { background: var(--accent-soft); color: var(--ink); }
+
+/* ============================================================
+   Layout principal
+   ============================================================ */
+main {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: var(--sp-4) var(--sp-3) var(--sp-10);
+}
+
+/* Row — flex utility */
+.row {
+  display: flex;
+  gap: var(--sp-2);
+  align-items: center;
+  margin-bottom: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.row > * { flex-shrink: 0; }
+.row > [flex] { flex: 1; min-width: 0; }
+
+/* ============================================================
+   Botones — elegantes, con peso tipográfico
+   ============================================================ */
+button,
+select {
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.01em;
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--paper-elev);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-sm);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:hover,
+select:hover {
+  background: var(--paper);
+  border-color: var(--ink-faint);
+}
+
+button:active,
+select:active {
+  transform: scale(0.98);
+  box-shadow: var(--sh-inner);
+}
+
+button:focus-visible,
+select:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+button:disabled,
+select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Botón primario — acento */
+button.primary,
+button[primary] {
+  background: var(--accent);
+  color: var(--ink);
+  border-color: var(--accent);
+  font-weight: var(--fw-bold);
+}
+
+button.primary:hover,
+button[primary]:hover {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+/* Botón ghost — solo texto */
+button.ghost,
+button[ghost] {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ink-muted);
+  padding: var(--sp-1) var(--sp-2);
+}
+
+button.ghost:hover,
+button[ghost]:hover {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+/* Botón pequeño */
+button.mini,
+button[mini] {
+  font-size: var(--fs-2xs);
+  padding: var(--sp-1) var(--sp-2);
+  font-weight: var(--fw-medium);
+}
+
+/* Select nativo — flecha personalizada */
+select {
+  padding-right: 2.5rem;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a827a' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+}
+
+/* ============================================================
+   Inputs — discretos, funcionales
+   ============================================================ */
+input[type="text"],
+input[type="number"],
+input[type="range"],
+textarea {
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  color: var(--ink);
+  background: var(--paper-sunken);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  transition: border-color var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out);
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+input[type="range"] {
+  flex: 1;
+  min-width: 80px;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--line);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--paper);
+  box-shadow: var(--sh-sm);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--paper);
+  box-shadow: var(--sh-sm);
+}
+
+input[type="number"] {
+  width: 60px;
+  padding: var(--sp-1) var(--sp-2);
+  text-align: center;
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+textarea {
+  min-height: 80px;
+  padding: var(--sp-2) var(--sp-3);
+  resize: vertical;
+  line-height: var(--lh-relaxed);
+}
+
+/* ============================================================
+   Cards — elevación sutil, sin sombras pesadas
+   ============================================================ */
+.card {
+  background: var(--paper-elev);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: var(--sp-3) var(--sp-4);
+  margin-top: var(--sp-3);
+}
+
+.card + .card { margin-top: var(--sp-3); }
+
+/* ============================================================
+   Tabs — parte de la navegación principal
+   ============================================================ */
+.tabs {
+  display: flex;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-4);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: var(--sp-2);
+}
+
+.tabs button {
+  flex: 1;
+  padding: var(--sp-2) var(--sp-1);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: var(--ink-muted);
+  box-shadow: none;
+  position: relative;
+}
+
+.tabs button:hover {
+  color: var(--ink);
+  background: transparent;
+}
+
+.tabs button.on {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: var(--fw-bold);
+}
+
+.tabs button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--r-sm);
+}
+
+/* ============================================================
+   Etiquetas de jugada — semánticas, con acento para Libro
+   ============================================================ */
+.tag {
+  display: inline-block;
+  font-family: var(--font-ui);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: var(--r-sm);
+  line-height: 1.4;
+}
+
+.Genial    { background: var(--green); color: #fff; }
+.Excelente { background: var(--green); color: #fff; opacity: 0.9; }
+.Bueno     { background: var(--green); color: #fff; opacity: 0.7; }
+.Libro     { background: var(--accent-soft); color: var(--ink); border: 1px solid var(--accent); }
+.Inexactitud { background: var(--accent-soft); color: var(--ink); opacity: 0.8; }
+.Error     { background: var(--red); color: #fff; opacity: 0.85; }
+.Fallo     { background: var(--red); color: #fff; }
+
+/* ============================================================
+   Scrollbar — discreta
+   ============================================================ */
+* { scrollbar-width: thin; scrollbar-color: var(--ink-faint) transparent; }
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: var(--ink-faint); border-radius: 3px; }
+*::-webkit-scrollbar-thumb:hover { background: var(--ink-muted); }
+
+/* ============================================================
+   Utilidades de layout
+   ============================================================ */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0;
+  margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}

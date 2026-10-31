@@ -1,59 +1,245 @@
 /* ============================================================
-   lord.css — chat del entrenador
+   lord.css — chat del entrenador Lord + holograma
+   Animaciones de panel (siempre on) + burbujas de chat
    ============================================================ */
 
+/* Contenedor de mensajes */
 #lm {
-  max-height: 48vh;
+  max-height: 50vh;
   overflow-y: auto;
-  margin: 8px 0;
+  margin: var(--sp-3) 0;
+  padding: var(--sp-1) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
 }
 
+/* Burbuja de mensaje */
 .bu {
-  max-width: 88%;
-  padding: 8px 12px;
-  border-radius: 14px;
-  margin: 6px 0;
-  white-space: pre-wrap;
-  line-height: 1.4;
-  font-size: 15px;
+  max-width: 85%;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-lg);
+  line-height: var(--lh-relaxed);
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  animation: bu-in var(--dur-normal) var(--ease-spring) both;
+  box-shadow: var(--sh-sm);
+  border: 1px solid var(--line);
 }
 
+@keyframes bu-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Usuario — alineado a la derecha, acento */
 .bu.u {
-  background: var(--ac, #2e7d32);
-  color: #fff;
-  margin-left: auto;
-  border-bottom-right-radius: 4px;
+  align-self: flex-end;
+  background: var(--accent);
+  color: var(--ink);
+  border-color: var(--accent);
+  border-bottom-right-radius: var(--r-sm);
 }
 
+/* Lord — alineado a la izquierda, card */
 .bu.a {
-  background: var(--card);
-  border-bottom-left-radius: 4px;
+  align-self: flex-start;
+  background: var(--paper-elev);
+  color: var(--ink);
+  border-color: var(--line);
+  border-bottom-left-radius: var(--r-sm);
 }
 
 .bu.a::before {
   content: "Lord";
   display: block;
-  font-weight: 700;
-  font-size: 12px;
-  opacity: .6;
+  font-family: var(--font-ui);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  margin-bottom: var(--sp-1);
+  opacity: 0.8;
 }
 
+/* Mensaje "pensando" */
+.bu.thinking {
+  opacity: 0.6;
+  font-style: italic;
+  color: var(--ink-muted);
+}
+
+.bu.thinking::after {
+  content: "";
+  display: inline-block;
+  width: 1.2em;
+  animation: thinking-dots 1.5s steps(3) infinite;
+}
+
+@keyframes thinking-dots {
+  0%   { content: "."; }
+  33%  { content: ".."; }
+  66%  { content: "..."; }
+}
+
+/* Input de chat */
 #li {
   flex: 1;
-  font: inherit;
-  padding: 6px 10px;
-  border-radius: 10px;
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-relaxed);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--paper-sunken);
+  color: var(--ink);
   resize: none;
   min-width: 0;
+  min-height: 48px;
+  max-height: 120px;
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
 }
 
+#li:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+#li::placeholder { color: var(--ink-faint); }
+
+/* Botón enviar */
+#ls {
+  padding: var(--sp-2) var(--sp-4);
+  font-weight: var(--fw-bold);
+  background: var(--accent);
+  color: var(--ink);
+  border-color: var(--accent);
+  white-space: nowrap;
+}
+
+#ls:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+#ls:active { transform: scale(0.98); }
+#ls:disabled { opacity: 0.45; }
+
+/* Preguntas sugeridas */
 #lch {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-bottom: 8px;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-3);
 }
 
 #lch .mini {
-  margin: 0;
+  font-size: var(--fs-2xs);
+  padding: var(--sp-1) var(--sp-2);
+  background: var(--paper-sunken);
+  border-color: var(--line);
+  color: var(--ink-muted);
+  font-weight: var(--fw-medium);
+  border-radius: var(--r-full);
+  white-space: nowrap;
+  transition: all var(--dur-fast);
 }
+
+#lch .mini:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+#lch .mini:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* Selector de jugada */
+#lsel {
+  width: 100%;
+  margin-top: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--fs-sm);
+}
+
+/* Futuros alternativos */
+#hfc { display: flex; gap: var(--sp-1); flex-wrap: wrap; margin-top: var(--sp-2); }
+
+#hfc button {
+  padding: var(--sp-1) var(--sp-3);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  border-radius: var(--r-full);
+  border: 1px solid var(--line);
+  background: var(--paper-elev);
+  color: var(--ink-muted);
+  transition: all var(--dur-fast) var(--ease-out);
+}
+
+#hfc button[data-type="peligro"]   { border-color: var(--red); color: var(--red); }
+#hfc button[data-type="mejor"]     { border-color: var(--green); color: var(--green); }
+#hfc button[data-type="alternativa"] { border-color: var(--accent); color: var(--accent); }
+#hfc button[data-type="oportunidad"] { border-color: var(--green); color: var(--green); opacity: 0.8; }
+
+#hfc button:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+#hfc button.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--ink);
+  font-weight: var(--fw-bold);
+  box-shadow: var(--sh-md);
+}
+
+/* Tablero holográfico */
+#hb {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  aspect-ratio: 1;
+  width: 100%;
+  max-width: 340px;
+  margin: var(--sp-3) auto;
+  background: var(--sq-dark);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  box-shadow: var(--sh-md), inset 0 0 0 1px var(--line);
+  animation: card-in var(--dur-panel) var(--ease-out) both;
+}
+
+#hb .sq { font-size: calc(min(100vw - 40px, 340px) / 8 * 0.78); cursor: default; }
+#hb .sq.l { background: var(--sq-light); }
+#hb .sq.d { background: var(--sq-dark); }
+#hb .sq > span,
+#hb .sq > img { transform: scale(0.82); }
+
+/* Casilla actual en el holograma */
+#hb .sq.current {
+  box-shadow: inset 0 0 0 3px var(--accent);
+  animation: hb-current 1s var(--ease-in-out) infinite;
+}
+
+@keyframes hb-current {
+  0%, 100% { box-shadow: inset 0 0 0 3px var(--accent); }
+  50%      { box-shadow: inset 0 0 0 6px var(--accent-soft); }
+}
+
+/* Navegación del holograma */
+#hct { display: flex; gap: var(--sp-1); margin-top: var(--sp-2); justify-content: center; }
+#hct button { flex: 0 0 auto; min-width: 44px; }
+
+/* Leyenda */
+#hl {
+  font-family: var(--font-ui);
+  font-size: var(--fs-xs);
+  color: var(--ink-muted);
+  text-align: center;
+  margin-top: var(--sp-2);
+  min-height: 1.5em;
+  line-height: var(--lh-relaxed);
+}
+
+/* Animaciones de entrada para el panel Lord */
+#tL .card {
+  animation: card-in var(--dur-panel) var(--ease-out) both;
+}
+
+#tL .card:nth-child(1) { animation-delay: 0ms; }
+#tL .card:nth-child(2) { animation-delay: 60ms; }
+#tL .card:nth-child(3) { animation-delay: 120ms; }
