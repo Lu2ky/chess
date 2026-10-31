@@ -163,7 +163,13 @@ export class GameModel {
   recordPlayerMove({ entry, advantage, color, increment }) {
     const state = this.state;
 
-    state.log.push(entry);
+    // Ensure entry has analysis object (for cached Stockfish results or legacy fallback)
+    const enrichedEntry = {
+      ...entry,
+      analysis: entry.analysis || null,
+    };
+
+    state.log.push(enrichedEntry);
     state.evalHistory.push(advantage);
     state.advantage = advantage;
     state.lastMove = [entry.from, entry.to];

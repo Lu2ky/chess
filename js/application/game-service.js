@@ -27,6 +27,20 @@ export class GameService {
     this.model = model;
     this.sound = sound;
     this.profile = profile;
+
+    // Stockfish readiness: se resuelve cuando el gateway está listo (o falla).
+    this.stockfishReady = new Promise(resolve => {
+      this._stockfishReadyResolve = resolve;
+    });
+
+    // Caché síncrona de amenazas para poder pintar en cada render.
+    this._threats = [];
+  }
+
+  /** Call this when Stockfish gateway becomes ready (or fails). */
+  setStockfishReady(ready) {
+    this._stockfishReadyResolve?.(ready);
+    this._stockfishReadyResolve = null;
   }
 
   /* ------------------------------------------------------------------ */
@@ -142,19 +156,51 @@ export class GameService {
   }
 
   /**
-   * Analiza y ejecuta la jugada del jugador.
+   * Analiza y ejecuta la jugada del jugador (async para Stockfish).
    * @returns {{entry:object, ended:boolean, needsReply:boolean}}
    */
-  playPlayerMove(move) {
+  async playPlayerMove(move) {
     const position = this.chess.position;
 
     this.model.beginAnalysis();
 
-    const classification = this.analysis.classify({
-      position,
-      move,
-      isBook: (candidate, loss) => this.isBookMove(candidate, loss),
-    });
+    // Espera a que el gateway resuelva (listo o no). Si no está listo,
+    // AnalysisService cae al motor legacy de forma transparente.
+    await this.stockfishReady;
+
+    const displayPhase = phaseOf(position.history().length, position.board());
+    // `phaseOf` usa a/m/f para las métricas; los umbrales usan o/m/e.
+    const analysisPhase =
+      displayPhase === 'a' ? 'o' : displayPhase === 'f' ? 'e' : 'm';
+    const isBook = (candidate, loss) => this.isBookMove(candidate, loss);
+
+    let classification;
+
+    try {
+      classification = await this.analysis.classify(
+        {
+          position,
+          move,
+          isBook,
+          elo: this.state.elo,
+          phase: analysisPhase,
+        },
+        15,
+      );
+    } catch (error) {
+      if (error?.name === 'AbortError') {
+        this.model.setBusy(false);
+        return null;
+      }
+
+      classification = this.analysis.classifySync({
+        position,
+        move,
+        isBook,
+        elo: this.state.elo,
+        phase: analysisPhase,
+      });
+    }
 
     const needsTip = MISTAKE_LABELS.includes(classification.label);
     const cause = needsTip
@@ -163,28 +209,50 @@ export class GameService {
 
     const color = position.turn();
     const ply = position.history().length;
-    const phase = phaseOf(ply, position.board());
-    const accuracy = accuracyFromLoss(classification.loss);
+    const lossPercent = classification.lossPercent ?? 0;
+    const accuracy = accuracyFromLoss(lossPercent);
 
-    position.move(classification.move);
-    const advantage = this.computeAdvantage();
+    // Aplicar la jugada REAL (no la versión normalizada del análisis).
+    position.move(move);
+
+    const advantage = await this.computeAdvantage();
+
+    const analysisData = {
+      engine: classification.engine || 'legacy',
+      depth: classification.depth ?? 0,
+      label: classification.label,
+      lossPercent,
+      bestMove: classification.bestMove
+        ? this.pickBest(classification.bestMove)
+        : null,
+      bestMoveSan:
+        classification.bestMoveSan || classification.bestMove?.san || null,
+      pv: classification.pv || [],
+      multipv: classification.multipv || [],
+      score: classification.score ?? 0,
+      playedScore: classification.playedScore ?? 0,
+      lossCp: classification.lossCp ?? 0,
+      timestamp: classification.timestamp || Date.now(),
+    };
 
     const entry = {
-      san: classification.move.san,
+      san: move.san,
       label: classification.label,
       color,
       ply,
-      loss: classification.loss,
-      best: needsTip ? classification.best : '',
-      bestMove: needsTip ? this.pickBest(classification.bestMove) : null,
+      loss: lossPercent,
+      lossCp: analysisData.lossCp,
+      best: needsTip ? analysisData.bestMoveSan || '' : '',
+      bestMove: needsTip ? analysisData.bestMove : null,
       acc: accuracy,
-      piece: classification.move.piece,
-      phase,
-      quiet: !classification.move.captured && !/[+#]/.test(classification.move.san),
+      piece: move.piece,
+      phase: displayPhase,
+      quiet: !move.captured && !/[+#]/.test(move.san),
       cause,
-      from: classification.move.from,
-      to: classification.move.to,
-      captured: classification.move.captured || null,
+      from: move.from,
+      to: move.to,
+      captured: move.captured || null,
+      analysis: analysisData,
     };
 
     this.model.recordPlayerMove({
@@ -203,7 +271,9 @@ export class GameService {
       rival: null,
     });
 
-    this.sound.play(classification.move.captured ? 1 : 0);
+    this.sound.play(move.captured ? 1 : 0);
+
+    if (this.state.showThreats) this.refreshThreats();
 
     const outcome = this.detectOutcome();
     if (outcome) {
@@ -222,7 +292,7 @@ export class GameService {
   }
 
   /** Turno del motor. */
-  playEngineMove() {
+  async playEngineMove() {
     if (this.state.ended) {
       this.model.setBusy(false);
       return null;
@@ -239,7 +309,7 @@ export class GameService {
 
     const color = position.turn();
     position.move(move);
-    const advantage = this.computeAdvantage();
+    const advantage = await this.computeAdvantage();
 
     this.model.recordEngineMove({
       move,
@@ -249,6 +319,8 @@ export class GameService {
     });
     this.model.setRivalMove(move.san);
     this.sound.play(move.captured ? 1 : 0);
+
+    if (this.state.showThreats) this.refreshThreats();
 
     const outcome = this.detectOutcome();
     if (outcome) {
@@ -288,12 +360,27 @@ export class GameService {
     return true;
   }
 
-  hint() {
+  async hint() {
     if (!this.isInteractive()) return false;
 
     if (!this.state.hint) {
-      const move = this.analysis.bestMove(this.chess.position, 3);
-      if (!move) return false;
+      let result = null;
+
+      try {
+        result = await this.analysis.bestMove(this.chess.position, 12);
+      } catch {
+        result = null;
+      }
+
+      if (!result?.move) {
+        const fallback = new Engine(this.chess.position.fork()).chooseMove(
+          this.state.elo,
+        );
+        if (!fallback) return false;
+        result = { move: fallback };
+      }
+
+      const move = result.move;
 
       this.model.setSelection(null);
       this.model.setGhost(null);
@@ -328,8 +415,47 @@ export class GameService {
   }
 
   toggleThreats() {
-    this.model.setShowThreats(!this.state.showThreats);
-    return this.state.showThreats;
+    const next = !this.state.showThreats;
+    this.model.setShowThreats(next);
+
+    if (next) {
+      this.refreshThreats();
+    } else {
+      this._threats = [];
+    }
+
+    return next;
+  }
+
+  /** Recalcula las amenazas en segundo plano y refresca la vista. */
+  async refreshThreats() {
+    if (!this.state.showThreats) {
+      this._threats = [];
+      return [];
+    }
+
+    const state = this.state;
+    const position = this.viewPosition();
+    const side = state.mode === '2' ? position.turn() : state.me;
+
+    try {
+      this._threats = await this.analysis.threats({
+        position,
+        side,
+        opponent: opposite(side),
+      });
+    } catch {
+      this._threats = [];
+    }
+
+    // Provoca un render con las amenazas ya calculadas.
+    this.model.setShowThreats(this.state.showThreats);
+    return this._threats;
+  }
+
+  /** Amenazas cacheadas (síncrono, para render). */
+  threats() {
+    return this.state.showThreats ? this._threats : [];
   }
 
   /** Justificación básica de una jugada del registro (texto plano). */
@@ -339,9 +465,10 @@ export class GameService {
 
     const best = entry.bestMove;
     const lines = [];
+    const pawns = (entry.lossCp ?? entry.analysis?.lossCp ?? 0) / 100;
     lines.push(
       `${entry.san} fue ${entry.label.toLowerCase()}: pierdes unos ` +
-        `${(entry.loss / 100).toFixed(1)} peones frente a ${best.san}.`,
+        `${pawns.toFixed(1)} peones frente a ${best.san}.`,
     );
 
     if (/#/.test(best.san)) lines.push(`${best.san} daba jaque mate.`);
@@ -377,18 +504,6 @@ export class GameService {
     }
 
     return lines.join('\n');
-  }
-
-  threats() {
-    const state = this.state;
-    const position = this.viewPosition();
-    const side = state.mode === '2' ? position.turn() : state.me;
-
-    return this.analysis.threats({
-      position,
-      side,
-      opponent: opposite(side),
-    });
   }
 
   navigate(direction) {
@@ -449,9 +564,19 @@ export class GameService {
   /* Internos                                                            */
   /* ------------------------------------------------------------------ */
 
-  computeAdvantage() {
-    const score = this.analysis.evaluateDepth(this.chess.position, 2);
-    const whiteScore = this.chess.position.turn() === 'w' ? score : -score;
+  async computeAdvantage() {
+    const position = this.chess.position;
+    let score = 0;
+
+    try {
+      score = await this.analysis.evaluateDepth(position, 10);
+    } catch {
+      score = 0;
+    }
+
+    if (typeof score !== 'number' || !Number.isFinite(score)) score = 0;
+
+    const whiteScore = position.turn() === 'w' ? score : -score;
     return clamp(whiteScore / 100, -10, 10);
   }
 

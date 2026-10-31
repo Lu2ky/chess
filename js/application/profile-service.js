@@ -11,6 +11,7 @@ export class ProfileService {
   }
 
   recordGame({ result, mode, elo, log, me, clocks, clockInitial, openingName }) {
+    // Compute metrics using analysis cache when available (backwards compatible)
     const metrics = computeMetrics(log, { mode, me });
 
     const timeScore = mode === 'p'

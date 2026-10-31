@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stockfish Integration Test</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; }
+    .test { padding: 1rem; margin: 1rem 0; border-radius: 8px; border: 1px solid #ddd; }
+    .test.pass { border-color: #4caf50; background: #e8f5e9; }
+    .test.fail { border-color: #f44336; background: #ffebee; }
+    .test.running { border-color: #2196f3; background: #e3f2fd; }
+    h1 { color: #333; }
+    button { padding: 0.75rem 1.5rem; font-size: 1rem; cursor: pointer; background: #2196f3; color: white; border: none; border-radius: 4px; }
+    button:disabled { background: #90caf9; cursor: not-allowed; }
+    pre { background: #f5f5f5; padding: 1rem; overflow: auto; max-height: 300px; }
+    .summary { font-size: 1.2rem; font-weight: bold; margin: 1rem 0; }
+    .spinner { display: inline-block; width: 1em; height: 1em; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 0.5rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <h1>🧪 Stockfish WASM Integration Test</h1>
+  <p>Valida el gateway UCI completo contra el worker real de Stockfish.</p>
+
+  <button id="runBtn" onclick="runTests()">Ejecutar Tests</button>
+  <button id="clearBtn" onclick="clearResults()" style="margin-left: 0.5rem;">Limpiar</button>
+
+  <div class="summary" id="summary"></div>
+  <div id="results"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <script type="module">
+    import { StockfishGateway } from './js/adapters/stockfish-gateway.js';
+    import { ChessPosition } from './js/adapters/chess-gateway.js';
+
+    const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+    const MATE_IN_1_FEN = '6k1/5ppp/8/8/8/8/5PPP/R5K1 w - - 0 1';
+
+    function position(fen) {
+      return new ChessPosition(new window.Chess(fen), window.Chess);
+    }
+
+    function validateAnalysisResult(result, label) {
+      const errors = [];
+      if (!result.bestMove) errors.push(`${label}: bestMove requerido`);
+      else if (!result.bestMove.from || !result.bestMove.to) errors.push(`${label}: bestMove from/to`);
+      if (!result.score || (result.score.cp === undefined && result.score.mate === undefined)) errors.push(`${label}: score cp/mate`);
+      if (!Array.isArray(result.pv)) errors.push(`${label}: pv array`);
+      if (!Array.isArray(result.multipv)) errors.push(`${label}: multipv array`);
+      return errors;
+    }
+
+    function addResult(name, passed, details = '', error = '') {
+      const container = document.getElementById('results');
+      const div = document.createElement('div');
+      div.className = `test ${passed ? 'pass' : 'fail'}`;
+      div.innerHTML = `
+        <strong>${passed ? '✅' : '❌'} ${name}</strong>
+        ${details ? `<div>${details}</div>` : ''}
+        ${error ? `<pre style="color:#c62828">${error}</pre>` : ''}
+      `;
+      container.appendChild(div);
+    }
+
+    function updateSummary(passed, failed, total) {
+      const el = document.getElementById('summary');
+      el.textContent = `Resultado: ${passed}/${total} passed ${failed > 0 ? `· ${failed} failed` : ''}`;
+      el.style.color = failed > 0 ? '#c62828' : '#2e7d32';
+    }
+
+    function clearResults() {
+      document.getElementById('results').innerHTML = '';
+      document.getElementById('summary').textContent = '';
+    }
+
+    async function runTests() {
+      clearResults();
+      const runBtn = document.getElementById('runBtn');
+      runBtn.disabled = true;
+      runBtn.innerHTML = '<span class="spinner"></span> Ejecutando...';
+
+      const gateway = new StockfishGateway();
+      let passed = 0, failed = 0;
+      const total = 6;
+
+      try {
+        // Test 1: Ready
+        const t1 = performance.now();
+        const ready = await gateway.ready();
+        const dt1 = performance.now() - t1;
+        if (!ready.ready) throw new Error('El motor no quedó listo');
+        addResult('Test 1: Inicialización y ready', true, `Ready en ${dt1.toFixed(0)}ms`);
+        passed++; updateSummary(passed, failed, total);
+
+        // Test 2: Análisis depth 15
+        const t2 = performance.now();
+        const r2 = await gateway.analyse(position(START_FEN), { depth: 15 });
+        const dt2 = performance.now() - t2;
+        const e2 = validateAnalysisResult(r2, 'Test 2');
+        if (e2.length) throw new Error(e2.join('; '));
+        addResult('Test 2: Análisis depth 15', true,
+          `Tiempo: ${dt2.toFixed(0)}ms\n` +
+          `BestMove: ${r2.bestMove.san}\n` +
+          `Score: ${r2.score.cp !== undefined ? r2.score.cp + 'cp' : 'mate ' + r2.score.mate}\n` +
+          `PV: ${r2.pv.join(' ')} · Multipv: ${r2.multipv.length} líneas`);
+        passed++; updateSummary(passed, failed, total);
+
+        // Test 3: Evaluación rápida
+        const t3 = performance.now();
+        const s3 = await gateway.evaluate(position(START_FEN));
+        const dt3 = performance.now() - t3;
+        if (s3.cp === undefined && s3.mate === undefined) throw new Error('Score inválido');
+        addResult('Test 3: Evaluación rápida', true,
+          `Tiempo: ${dt3.toFixed(0)}ms · Score: ${s3.cp !== undefined ? s3.cp + 'cp' : 'mate ' + s3.mate}`);
+        passed++; updateSummary(passed, failed, total);
+
+        // Test 4: Multipv 3
+        const r4 = await gateway.analyse(position(START_FEN), { depth: 12, multipv: 3 });
+        const e4 = validateAnalysisResult(r4, 'Test 4');
+        if (e4.length) throw new Error(e4.join('; '));
+        const mpvDetails = r4.multipv.map((line, i) => {
+          const sc = line.score.cp !== undefined ? line.score.cp + 'cp' : 'mate ' + line.score.mate;
+          return `${i + 1}. ${line.move.san} (${sc})`;
+        }).join('\n');
+        addResult('Test 4: Multipv 3', r4.multipv.length >= 3,
+          `Líneas: ${r4.multipv.length}/3\n${mpvDetails}`);
+        if (r4.multipv.length >= 3) passed++; else failed++;
+        updateSummary(passed, failed, total);
+
+        // Test 5: AbortSignal
+        const ctrl = new AbortController();
+        ctrl.abort();
+        try {
+          await gateway.analyse(position(START_FEN), { depth: 20 }, ctrl.signal);
+          throw new Error('Debería haber abortado');
+        } catch (e) {
+          if (e.name === 'AbortError') {
+            addResult('Test 5: AbortSignal', true, 'Abortado correctamente');
+            passed++;
+          } else throw e;
+        }
+        updateSummary(passed, failed, total);
+
+        // Test 6: Mate en 1
+        const r6 = await gateway.analyse(position(MATE_IN_1_FEN), { depth: 10 });
+        const e6 = validateAnalysisResult(r6, 'Test 6');
+        if (e6.length) throw new Error(e6.join('; '));
+        const mateDetected = r6.score.mate !== undefined && r6.score.mate > 0;
+        addResult('Test 6: Detección de mate', mateDetected,
+          `Score: ${r6.score.mate !== undefined ? 'mate en ' + r6.score.mate : r6.score.cp + 'cp'}\n` +
+          `BestMove: ${r6.bestMove.san}`);
+        if (mateDetected) passed++; else failed++;
+        updateSummary(passed, failed, total);
+      } catch (err) {
+        addResult('Error fatal', false, '', err.message);
+        failed++;
+        updateSummary(passed, failed, total);
+      } finally {
+        gateway.terminate();
+        runBtn.disabled = false;
+        runBtn.textContent = 'Ejecutar Tests';
+      }
+    }
+
+    window.runTests = runTests;
+    window.clearResults = clearResults;
+  </script>
+</body>
+</html>

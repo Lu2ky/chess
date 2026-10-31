@@ -10,6 +10,7 @@ import { LocalStorageGateway } from './adapters/storage-gateway.js';
 import { ClaudeGateway } from './adapters/ai-gateway.js';
 import { SoundGateway } from './adapters/sound-gateway.js';
 import { createOpeningBook } from './adapters/opening-book.js';
+import { createStockfishGateway } from './adapters/stockfish-gateway.js';
 
 import { GameModel } from './model/game-model.js';
 import { ConfigModel } from './model/config-model.js';
@@ -60,7 +61,8 @@ function boot() {
   });
 
   /* ----------------------------- aplicación ----------------------------- */
-  const analysis = new AnalysisService({ chess });
+  const stockfish = createStockfishGateway();
+  const analysis = new AnalysisService({ chess, stockfish });
   const openings = new OpeningService({ book, chess });
   const profileService = new ProfileService({ model: profileModel });
 
@@ -72,6 +74,21 @@ function boot() {
     model: gameModel,
     sound,
     profile: profileService,
+  });
+
+  // Inicializa Stockfish y avisa al servicio. Si tarda o falla, el análisis
+  // sigue funcionando con el motor legacy.
+  const readyTimeout = new Promise(resolve =>
+    setTimeout(() => resolve({ ready: false }), 4000),
+  );
+
+  Promise.race([stockfish.ready(), readyTimeout]).then(({ ready }) => {
+    gameService.setStockfishReady(ready);
+    if (!ready) {
+      console.warn(
+        '[Stockfish] No disponible; el análisis usará el motor legacy.',
+      );
+    }
   });
 
   const lordService = new LordService({ chess, ai });
@@ -153,6 +170,16 @@ function boot() {
   appController.start();
 
   window.__APP_STARTED__ = true;
+  window.__CHESS__ = {
+    stockfish,
+    analysis,
+    gameService,
+    gameModel,
+    gameController,
+    lordService,
+    lordModel,
+    lordController,
+  };
 }
 
 try {

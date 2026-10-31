@@ -60,6 +60,10 @@ export class GameController {
     this.gameView.applyDefaults(this.configModel.config);
     this.newGame();
     this.startClock();
+
+    // El análisis funciona también con el motor legacy, así que las
+    // acciones están disponibles desde el principio.
+    this.gameView.setAnalysisButtonsEnabled(true);
   }
 
   bind() {
@@ -167,16 +171,15 @@ export class GameController {
     // Deja pintar "Analizando…" antes del cálculo del motor.
     this.model.beginAnalysis();
 
-    setTimeout(() => {
+    // Async play - no more fake setTimeout
+    (async () => {
       if (this.model.state.gameId !== gameId) return;
 
-      const outcome = this.service.playPlayerMove(move);
+      const outcome = await this.service.playPlayerMove(move);
       if (!outcome || !outcome.needsReply) return;
 
-      setTimeout(() => {
-        if (this.model.state.gameId === gameId) this.reply();
-      }, 30);
-    }, 0);
+      if (this.model.state.gameId === gameId) this.reply();
+    })();
   }
 
   reply() {
@@ -185,7 +188,11 @@ export class GameController {
 
     setTimeout(() => {
       if (this.model.state.gameId !== gameId) return;
-      this.service.playEngineMove();
+
+      Promise.resolve(this.service.playEngineMove()).catch(error => {
+        console.error('No se pudo jugar la respuesta del motor:', error);
+        this.model.setBusy(false);
+      });
     }, 30);
   }
 
@@ -195,7 +202,9 @@ export class GameController {
   }
 
   hint() {
-    this.service.hint();
+    this.service.hint().catch(error => {
+      console.error('No se pudo calcular la pista:', error);
+    });
   }
 
   threats() {

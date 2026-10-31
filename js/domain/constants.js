@@ -60,6 +60,9 @@ export const LABEL_COLOR = Object.freeze({
 /** Etiquetas que disparan explicación y "mejor jugada". */
 export const MISTAKE_LABELS = Object.freeze(['Inexactitud', 'Error', 'Fallo']);
 
+/** Tramos de ELO para interpolar umbrales (de menor a mayor). */
+export const ELO_TIERS = Object.freeze([800, 1200, 1600, 2000, 2400]);
+
 /** Habilidades evaluadas en el perfil. */
 export const SKILL_KEYS = Object.freeze(['ap', 'ta', 'es', 'fi', 'ti']);
 

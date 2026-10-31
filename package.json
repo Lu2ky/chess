@@ -1,0 +1,10 @@
+{
+  "name": "chess-trainer",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test js/domain/__tests__/classification.test.js",
+    "test:stockfish": "node js/tests/stockfish-node-test.mjs"
+  }
+}

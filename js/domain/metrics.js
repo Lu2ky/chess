@@ -45,13 +45,19 @@ export function phaseOf(ply, board) {
  */
 export function computeMetrics(log, { mode, me }) {
   const mine = log.filter(entry => mode === '2' || entry.color === me);
+  
+  // Use cached analysis data when available (for loss, label, accuracy)
+  const getLoss = entry => entry.analysis?.lossPercent ?? entry.loss ?? 0;
+  const getLabel = entry => entry.analysis?.label ?? entry.label ?? 'Bueno';
+  const getAcc = entry => entry.analysis ? accuracyFromLoss(entry.analysis.lossPercent) : entry.acc;
+
   const avg = values => average(values);
-  const phaseAvg = phase => avg(mine.filter(entry => entry.phase === phase).map(entry => entry.acc));
-  const count = label => mine.filter(entry => entry.label === label).length;
+  const phaseAvg = phase => avg(mine.filter(entry => entry.phase === phase).map(entry => getAcc(entry)));
+  const count = label => mine.filter(entry => getLabel(entry) === label).length;
   const n = mine.length;
 
   const quietMid = avg(
-    mine.filter(entry => entry.phase === 'm' && entry.quiet).map(entry => entry.acc),
+    mine.filter(entry => entry.phase === 'm' && entry.quiet).map(entry => getAcc(entry)),
   );
 
   const tactics = n
@@ -67,7 +73,7 @@ export function computeMetrics(log, { mode, me }) {
     n,
     mine,
     count,
-    acc: avg(mine.map(entry => entry.acc)),
+    acc: avg(mine.map(entry => getAcc(entry))),
     ap: phaseAvg('a'),
     mi: phaseAvg('m'),
     fi: phaseAvg('f'),
@@ -81,7 +87,7 @@ export function labelCounts(log, { mode, me }) {
   const mine = log.filter(entry => mode === '2' || entry.color === me);
   const counts = {};
   for (const label of LABELS) {
-    counts[label] = mine.filter(entry => entry.label === label).length;
+    counts[label] = mine.filter(entry => (entry.analysis?.label ?? entry.label) === label).length;
   }
   return counts;
 }
@@ -93,8 +99,9 @@ export function pieceAccuracy(log, { mode, me }) {
 
   for (const entry of mine) {
     if (!entry.piece) continue;
+    const acc = entry.analysis ? accuracyFromLoss(entry.analysis.lossPercent) : entry.acc;
     const bucket = result[entry.piece] || (result[entry.piece] = [0, 0]);
-    bucket[0] += entry.acc;
+    bucket[0] += acc;
     bucket[1] += 1;
   }
 

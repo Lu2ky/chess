@@ -15,6 +15,8 @@ const escape = text =>
 
 const percent = value => (value == null ? '—' : `${value.toFixed(0)}%`);
 const decimal = value => (value == null ? '—' : `${value.toFixed(1)}%`);
+const pawnsLost = entry =>
+  ((entry?.lossCp ?? entry?.analysis?.lossCp ?? 0) / 100).toFixed(1);
 
 export class PostgameView {
   constructor() {
@@ -210,7 +212,7 @@ export class PostgameView {
         ? vm.keyMoments.map(entry =>
           `${escape(entry.number)} ${escape(entry.san)} ` +
           `<span class="tag ${escape(entry.label)}">${escape(entry.label)}</span> ` +
-          `−${(entry.loss / 100).toFixed(1)}${entry.cause ? ` · ${escape(entry.cause)}` : ''}`,
+          `−${pawnsLost(entry)}${entry.cause ? ` · ${escape(entry.cause)}` : ''}`,
         ).join('<br>')
         : 'Ninguno todavía'
     );
@@ -228,7 +230,7 @@ export class PostgameView {
       if (entry) {
         return (
           `<b>${escape(entry.number)} ${escape(entry.san)}</b> · ${escape(entry.label)}<br>` +
-          `Puntuación perdida: −${(entry.loss / 100).toFixed(1)}` +
+          `Puntuación perdida: −${pawnsLost(entry)}` +
           `${entry.best ? ` · mejor: ${escape(entry.best)}` : ''}`
         );
       }
@@ -248,7 +250,7 @@ export class PostgameView {
     return (
       `<b>${index ? `Jugada ${index}` : 'Inicio'}</b><br>` +
       `Ventaja: ${this.vm.series[index] > 0 ? '+' : ''}${this.vm.series[index].toFixed(1)}` +
-      `${entry ? `<br>${escape(entry.label)} · −${(entry.loss / 100).toFixed(1)}` : ''}`
+      `${entry ? `<br>${escape(entry.label)} · −${pawnsLost(entry)}` : ''}`
     );
   }
 

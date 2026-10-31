@@ -51,6 +51,7 @@ export class GameView {
     };
 
     this.callbacks = {};
+    this.analysisEnabled = false;
     this.bind();
   }
 
@@ -235,12 +236,22 @@ export class GameView {
   }
 
   buttons(index, ghostVisible = false) {
+    const disabled = !this.analysisEnabled ? 'disabled' : '';
     return (
       `<button class="mini" data-action="show" data-index="${index}">` +
       `${ghostVisible ? 'Ocultar' : 'Mostrar'}</button>` +
       `<button class="mini" data-action="why" data-index="${index}">Justificar</button>` +
-      `<button class="mini" data-action="lord" data-index="${index}">Lord</button>` +
+      `<button class="mini" data-action="lord" data-index="${index}" ${disabled}>Lord</button>` +
       `<button class="mini" data-action="go" data-index="${index}">Ir</button>`
     );
+  }
+
+  setAnalysisButtonsEnabled(enabled) {
+    this.analysisEnabled = enabled;
+    const { elements } = this;
+    elements.hint.disabled = !enabled;
+    elements.threats.disabled = !enabled;
+    const lordButtons = elements.list.querySelectorAll('[data-action="lord"]');
+    lordButtons.forEach(btn => { btn.disabled = !enabled; });
   }
 }

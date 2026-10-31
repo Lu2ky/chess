@@ -15,7 +15,7 @@ import {
   opposite,
   colorName,
 } from '../domain/constants.js';
-import { average, emaSkillRatings, ratingFromAccuracy } from '../domain/metrics.js';
+import { average, emaSkillRatings, ratingFromAccuracy, accuracyFromLoss } from '../domain/metrics.js';
 import { moveNumberLabel } from '../domain/notation.js';
 
 export const formatClock = seconds => {
@@ -224,7 +224,11 @@ function pieceRows(entries) {
     if (!entry.piece) continue;
     const bucket = map[entry.piece] || (map[entry.piece] = { count: 0, sum: 0 });
     bucket.count += 1;
-    bucket.sum += entry.acc;
+    bucket.sum += entry.analysis?.lossPercent != null
+      ? accuracyFromLoss(entry.analysis.lossPercent)
+      : typeof entry.acc === 'number'
+        ? entry.acc
+        : accuracyFromLoss(entry.loss ?? 0);
   }
 
   return Object.entries(map)
@@ -254,8 +258,15 @@ export function buildPostGameVM({ state, metrics, lastText }) {
   ];
 
   const keyMoments = state.log
-    .filter(entry => entry.loss >= 100)
-    .sort((a, b) => b.loss - a.loss)
+    .filter(entry => {
+      const label = entry.analysis?.label ?? entry.label;
+      return label === 'Error' || label === 'Fallo';
+    })
+    .sort((a, b) => {
+      const lossA = a.analysis?.lossPercent ?? a.loss ?? 0;
+      const lossB = b.analysis?.lossPercent ?? b.loss ?? 0;
+      return lossB - lossA;
+    })
     .slice(0, 3)
     .map(entry => ({ ...entry, number: moveNumberLabel(entry) }));
 

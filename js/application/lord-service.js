@@ -7,7 +7,7 @@
 import { FUTURE_COLORS, colorName } from '../domain/constants.js';
 import { moveNumberLabel } from '../domain/notation.js';
 
-export const AI_INSTRUCTIONS = `Eres Lord, entrenador de ajedrez dentro de una app. Responde siempre en español, claro y breve (máximo unas 150 palabras), con jugadas en notación algebraica. Usa solo jugadas legales en la posición dada y no inventes variantes que no puedas comprobar. El análisis del motor de la app es de poca profundidad (3 jugadas) y puede equivocarse: si dudas de su recomendación, dilo con honestidad.
+export const AI_INSTRUCTIONS = `Eres Lord, entrenador de ajedrez dentro de una app. Responde siempre en español, claro y breve (máximo unas 150 palabras), con jugadas en notación algebraica. Usa solo jugadas legales en la posición dada y no inventes variantes que no puedas comprobar. El análisis del motor de la app usa Stockfish a profundidad 15 y puede equivocarse: si dudas de su recomendación, dilo con honestidad.
 
 Después de tu explicación añade SIEMPRE, al final, una sola línea con este formato exacto: <<FUTUROS>>[{"nombre":"corto","tipo":"peligro|mejor|alternativa|oportunidad","desde":"antes|despues|actual","jugadas":["Nf3","e5"]}]<<FIN>> con máximo 3 futuros de máximo 6 jugadas (medias jugadas) cada uno, en notación SAN, empezando por el bando al que le toca en la posición de salida y solo con jugadas legales. peligro = amenaza o error que puede ocurrir, mejor = la línea recomendada, alternativa = otra opción, oportunidad = ventaja que podía aprovecharse. desde: antes = posición antes de la jugada del usuario, despues = posición tras su jugada, actual = posición actual de la partida. Si no hay variantes útiles, usa [].`;
 
@@ -26,11 +26,12 @@ export class LordService {
     const before = this.chess.positionAt(entry.ply).fen();
     const after = this.chess.positionAt(entry.ply + 1).fen();
     const moveNumber = moveNumberLabel(entry);
+    const pawns = (entry.lossCp ?? entry.analysis?.lossCp ?? 0) / 100;
 
     return [
       `Posición antes de la jugada (FEN): ${before}`,
       `Posición después de la jugada (FEN): ${after}`,
-      `Jugada del usuario: ${moveNumber} ${entry.san} (${colorName(entry.color)}), etiqueta: ${entry.label}, pérdida aproximada ${(entry.loss / 100).toFixed(1)} peones.`,
+      `Jugada del usuario: ${moveNumber} ${entry.san} (${colorName(entry.color)}), etiqueta: ${entry.label}, pérdida aproximada ${pawns.toFixed(1)} peones.`,
       `Mejor jugada según el motor: ${entry.best || 'ninguna distinta'}. Causa detectada: ${entry.cause || 'ninguna'}. Apertura: ${openingName || 'no reconocida'}.`,
       `Justificación básica de la app: ${entry.why || 'no generada'}`,
       `Partida completa (PGN): ${this.chess.position.pgn()}`,
